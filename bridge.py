@@ -34,7 +34,7 @@ async def run_dbstats_multiple(files, channel=None, send_feedback=True):
         print("[INFO] No new files to process with DBStats.")
         return
 
-    cmd = [paths.DBSTATS_PATH]
+    cmd = [paths.DBSTATS_EXE_PATH]
     print(f"[INFO] Launching DBStats.")
 
     proc = await asyncio.create_subprocess_exec(
