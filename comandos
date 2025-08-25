@@ -1,0 +1,28 @@
+!player best player_name (best game)
+!player stats player_name N (average stats of the player's last 'n' games)
+!player recent player_name N (player's last 'N' games)
+
+!player player_name match match_id (same 'last' command but with a specific game)
+
+!player search name_fragment (list players whose name matches that fragment)
+
+!match last N (displays a "list" of the last games and their 'match_id')
+!match info match_id (displays information about the match, the teams, and the players on each team)
+!match summary match_id (shows the result of the match, who won, kills, deaths, MVP, etc)
+!match best N match_id (show the best 'N' players of that game)
+
+!leaderboard matchmaking N (shows top 'N' saved players)
+!leaderboard desertbus N (same, but for db)
+!leaderboard kd N (top 'N' players with the best overall KD)
+!leaderboard kda N (top 'N' players with the best overall KDA)
+!leaderboard mvp N (players with the most MVPs)
+
+!compare player_name_1 player_name_2 N (compare two players in the last 'N' games)
+!compare match match_id player_name_1 player_name_2 (compares 2 players in a single game)
+
+!history player_name_1 vs player_name_2 (history of matches between 2 players)
+
+!random player
+!random match
+
+!help

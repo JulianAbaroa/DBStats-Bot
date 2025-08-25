@@ -1,0 +1,25 @@
+# Entornos virtuales
+venv/
+.env
+.env.*
+
+# Archivos de Python compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Logs y bases de datos locales
+*.log
+*.sqlite3
+*.db
+
+# Configs sensibles
+config.json
+credentials.json
+token.txt
+
+# IDEs y editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
