@@ -1,5 +1,7 @@
+import subprocess
 import asyncio
 import paths
+import sys
 import os
 
 TEXT_CHANNEL_ID = 1405331337254146048
@@ -34,8 +36,10 @@ async def run_dbstats_multiple(files, channel=None, send_feedback=True):
         print("[INFO] No new files to process with DBStats.")
         return
 
-    cmd = [paths.DBSTATS_EXE_PATH]
-    print(f"[INFO] Launching DBStats.")
+    dll_path = paths.DBSTATS_EXE_PATH
+    cmd = ["dotnet", dll_path, *files]
+
+    print(f"[INFO] Launching DBStats with cmd: {' '.join(cmd)}")
 
     proc = await asyncio.create_subprocess_exec(
         *cmd,
