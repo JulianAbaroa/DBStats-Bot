@@ -15,15 +15,7 @@ class Player(commands.Cog):
 
     @commands.group(name="player", invoke_without_command=True)
     async def player_group(self, ctx, *, arg: str = None):
-        """
-        Player commands group:
-
-        Commands:
-        - !player <player_name> calls -> lookup()
-        - !player lookup <player_name> -> Shows player profile.
-        - !player last <player_name> -> Shows the last saved match.
-        - !player best <player_name> -> Shows the best saved match (in terms of rating).
-        """
+        """Player-related commands (lookup, last, best, etc)."""
         if arg is None:
             await ctx.send("Use `!help player` to see all available subcommands.")
             return
@@ -32,6 +24,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="lookup")
     async def player_lookup(self, ctx, *, player_name: str):
+        """`!player <player_name>` or `!player lookup <player_name>` -> Shows the player's profile."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -55,7 +48,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="last")
     async def last(self, ctx, *, player_name: str):
-        """Muestra el último match del jugador con paginación."""
+        """`!player last <player_name>` -> Shows the last saved match."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -117,7 +110,7 @@ class Player(commands.Cog):
     
     @player_group.command(name="best")
     async def best(self, ctx, *, player_name: str):
-        """Muestra el mejor match del jugador con paginación."""
+        """`!player best <player_name>` -> Shows the best saved match (in terms of rating)."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row

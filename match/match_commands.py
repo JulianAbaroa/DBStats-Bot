@@ -9,16 +9,12 @@ class Match(commands.Cog):
     
     @commands.group(name="match", invoke_without_command=True)
     async def match_group(self, ctx):   
-        """
-        Match commands group:
-
-        Commands:
-        - !match last -> Shows the last saved match.
-        """
-        await ctx.send("Usage: `!match last`")
+        """Match-related commands (last, etc)."""
+        await ctx.send("Use `!help match` to see all available subcommands.")
     
     @match_group.command(name="last")
     async def last_match(self, ctx):
+        """`!match last` -> Shows the last saved match."""
         async with aiosqlite.connect(paths.DATABASE_PATH) as db:
             db.row_factory = aiosqlite.Row
     
