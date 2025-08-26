@@ -11,3 +11,6 @@ class DBStats(commands.Cog):
             return
         
         await ctx.send("No.")
+
+async def setup(bot):
+    await bot.add_cog(DBStats(bot))
