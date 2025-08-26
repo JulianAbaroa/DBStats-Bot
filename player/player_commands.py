@@ -15,16 +15,16 @@ class Player(commands.Cog):
 
     @commands.group(name="player", invoke_without_command=True)
     async def player_group(self, ctx, *, arg: str = None):
-        """Player-related commands (lookup, last, best, etc)."""
+        """Player-related commands (lookup, last, best, etc). Arguments: player_name: The name of the player to be consulted."""
         if arg is None:
-            await ctx.send("Use `!help player` to see all available subcommands.")
+            await ctx.send("Use !help player to see all available subcommands.")
             return
 
         await ctx.invoke(self.player_lookup, player_name=arg)
 
     @player_group.command(name="lookup")
     async def player_lookup(self, ctx, *, player_name: str):
-        """`!player <player_name>` or `!player lookup <player_name>` -> Shows the player's profile."""
+        """!player <player_name> or !player lookup <player_name> -> Shows the player's profile."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -48,7 +48,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="last")
     async def last(self, ctx, *, player_name: str):
-        """`!player last <player_name>` -> Shows the last saved match."""
+        """!player last <player_name> -> Shows the last saved match."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
