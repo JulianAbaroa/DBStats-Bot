@@ -1,23 +1,22 @@
 import os
 
-external_drive_path = "/media/pi/MiDiscoExterno"
+media_path = "/media/maste"
+drives = [os.path.join(media_path, d) for d in os.listdir(media_path)]
+halo_drive = None
 
-halo_directory_external = os.path.join(external_drive_path, "Halo")
+for d in drives:
+    if os.path.isdir(os.path.join(d, "Halo")):
+        halo_drive = d
+        break
 
-CARNAGES_DIRECTORY = os.path.join(halo_directory_external, "Carnages")
-DATABASE_PATH = os.path.join(halo_directory_external, "DBStats DataBase", "dbstats.db")
+if not halo_drive:
+    raise RuntimeError("No se encontró el disco duro externo con Halo montado")
+
+# Rutas
+CARNAGES_DIRECTORY = os.path.join(halo_drive, "Halo", "Carnages")
+DATABASE_PATH = os.path.join(halo_drive, "Halo", "DBStats DataBase", "dbstats.db")
 PROCESSED_DIRECTORY = os.path.join(CARNAGES_DIRECTORY, "Processed")
 
-script_directory = os.path.dirname(os.path.abspath(__file__))
-
-project_root_msd = os.path.join(script_directory, "..")
-
-DBSTATS_EXE_PATH = os.path.join(project_root_msd, "DBStats", "bin", "Debug", "net9.0", "DBStats.exe")
-
-print("Rutas en el disco duro externo:")
-print(f"Directorio de Carnages: {CARNAGES_DIRECTORY}")
-print(f"Ruta de la base de datos: {DATABASE_PATH}")
-print(f"Directorio de procesados: {PROCESSED_DIRECTORY}")
-print("\n")
-print("Ruta en la tarjeta microSD:")
-print(f"Ejecutable de DBStats: {DBSTATS_EXE_PATH}")
+print(f"Disco externo detectado en: {halo_drive}")
+print(f"Carnages: {CARNAGES_DIRECTORY}")
+print(f"DB: {DATABASE_PATH}")
