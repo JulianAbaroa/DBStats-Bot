@@ -1,7 +1,5 @@
-import subprocess
 import asyncio
 import paths
-import sys
 import os
 
 TEXT_CHANNEL_ID = 1405331337254146048

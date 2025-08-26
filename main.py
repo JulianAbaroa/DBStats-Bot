@@ -31,6 +31,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 async def setup_extensions():
+    await bot.load_extension("dbstats.dbstats_commands")
     await bot.load_extension("player.player_commands")
     await bot.load_extension("match.match_commands")
 

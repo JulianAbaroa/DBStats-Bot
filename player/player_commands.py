@@ -13,23 +13,19 @@ class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(name="dbstats", invoke_without_command=True)
-    async def dbstats_group(self, ctx, *, arg: str = None):
-        if arg is None:
-            await ctx.send("GIVE ME DATAAAA")
-            return
-        
-        await ctx.send("No.")
-        
     @commands.group(name="player", invoke_without_command=True)
     async def player_group(self, ctx, *, arg: str = None):
         """
-        !player <player_name> -> lookup()
-        !player lookup <player_name> -> lookup()
-        !player last <player_name> -> last_match()
+        Player commands group:
+
+        Commands:
+        - !player <player_name> calls -> lookup()
+        - !player lookup <player_name> -> Shows player profile.
+        - !player last <player_name> -> Shows the last saved match.
+        - !player best <player_name> -> Shows the best saved match (in terms of rating).
         """
         if arg is None:
-            await ctx.send("Usage: `!player <player_name>` or `!player lookup <player_name>` or `!player last <player_name>`")
+            await ctx.send("Use `!help player` to see all available subcommands.")
             return
 
         await ctx.invoke(self.player_lookup, player_name=arg)

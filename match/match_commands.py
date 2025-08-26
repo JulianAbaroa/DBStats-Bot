@@ -9,6 +9,12 @@ class Match(commands.Cog):
     
     @commands.group(name="match", invoke_without_command=True)
     async def match_group(self, ctx):   
+        """
+        Match commands group:
+
+        Commands:
+        - !match last -> Shows the last saved match.
+        """
         await ctx.send("Usage: `!match last`")
     
     @match_group.command(name="last")
