@@ -15,7 +15,7 @@ class Player(commands.Cog):
 
     @commands.group(name="player", invoke_without_command=True)
     async def player_group(self, ctx, *, arg: str = None):
-        """Player-related commands (lookup, last, best, etc)."""
+        """Player-related commands (lookup, last, best, avg, etc)."""
         if arg is None:
             await ctx.send("Use `!help player` to see all available subcommands.")
             return
@@ -170,10 +170,10 @@ class Player(commands.Cog):
             traceback.print_exc(file=sys.stderr)
             await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
 
-    @player_group.command(name="stats")
-    async def stats(self, ctx, player_name: str, num_matches: int = 5):
+    @player_group.command(name="avg")
+    async def avg(self, ctx, player_name: str, num_matches: int = 5):
         """
-        !player stats <player_name> <number> -> Displays the player's average stats over their last <number> matches. 
+        !player avg <player_name> <number> -> Displays the player's average stats over their last <number> matches. 
         Defaults to 5 matches if number is not provided.
         """
         try:

@@ -341,7 +341,7 @@ def create_player_medals_embed(player_match: Dict, medals_data: List[Dict]) -> d
     embed.add_field(
         name="Medals Info:",
         value="\n".join(
-            f"{medal_emojis.get(row['medal_type'])} {row['medal_type']}: {row['count']} " for row in medals_data
+            f"{medal_emojis.get(row['medal_type'])} {row['medal_type']}: {truncate_float(row['count'])} " for row in medals_data
         ) if medals_data else "N/A",
         inline=False
     )
