@@ -24,7 +24,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="lookup")
     async def lookup(self, ctx, *, player_name: str):
-        """Shows the player's profile and customization."""
+        """Displays the player's profile and customization."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -48,7 +48,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="last")
     async def last(self, ctx, *, player_name: str):
-        """Shows the last saved match for the specified player."""
+        """Displays the last saved match for the specified player."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -110,7 +110,7 @@ class Player(commands.Cog):
     
     @player_group.command(name="best")
     async def best(self, ctx, *, player_name: str):
-        """Shows the best saved match in terms of rating for the specified player."""
+        """Displays the best saved match in terms of rating for the specified player."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -172,7 +172,7 @@ class Player(commands.Cog):
     @player_group.command(name="avg")
     async def avg(self, ctx, player_name: str, num_matches: str = "5"):
         """
-        Shows the player's average stats over their last `number` matches. 
+        Displays the player's average stats over their last `number` matches. 
         Defaults to 5 matches if number is not provided.
         """
         if num_matches.lower() == "all":
@@ -246,7 +246,7 @@ class Player(commands.Cog):
     @player_group.command(name="recent")
     async def recent(self, ctx, player_name: str, num_matches: str = "5"):
         """
-        Shows the recent matches for the specified player.
+        Displays the recent matches for the specified player.
         Defaults to 5 matches if a number is not provided.
         """
         if num_matches.lower() == "all":
@@ -283,6 +283,70 @@ class Player(commands.Cog):
         except Exception:
             traceback.print_exc(file=sys.stderr)
             await ctx.send("An error occurred while fetching recent games. Please check the bot logs.")
+
+    @player_group.command(name="match")
+    async def match(self, ctx, player_name: str, match_id: str):
+        """
+        Displays the match of the player with the specified `match_id`.
+        """
+        try:
+            async with aiosqlite.connect(paths.DATABASE_PATH) as db:
+                db.row_factory = aiosqlite.Row
+                
+                query = queries.get("player_match")
+                async with db.execute(query, (player_name, match_id)) as cursor:
+                    player_match = await cursor.fetchone()
+
+                if not player_match:
+                    await ctx.send(f"No match found for '{player_name}' with ID '{match_id}'.")
+                    return
+
+                subqueries = {
+                    "team": queries.get("player_match_team"),
+                    "rating": queries.get("player_match_rating"),
+                    "combat": queries.get("player_match_combat"),
+                    "breakdown": queries.get("player_match_breakdown"),
+                    "rivalries": queries.get("player_match_rivalries"),
+                    "survivability": queries.get("player_match_survivability"),
+                    "choice": queries.get("player_match_choice"),
+                    "medals": queries.get("player_match_medals"),
+                    "penalties": queries.get("player_match_penalties"),
+                }
+                data = {}
+                for name, subquery in subqueries.items():
+                    async with db.execute(subquery, (player_match["player_name"], match_id)) as cursor:
+                        if name == "medals":
+                            rows = await cursor.fetchall()
+                            data[name] = [dict(row) for row in rows]
+                        else:
+                            row = await cursor.fetchone()
+                            data[name] = dict(row) if row else None
+                
+                all_embeds = [
+                    player_embeds.create_player_match_embed(dict(player_match)),
+                    player_embeds.create_player_team_embed(dict(player_match), data.get("team", {})),
+                    player_embeds.create_player_rating_embed(dict(player_match), data.get("rating", {})),
+                    player_embeds.create_player_combat_embed(dict(player_match), data.get("combat", {})),
+                    player_embeds.create_player_breakdown_embed(dict(player_match), data.get("breakdown", {})),
+                    player_embeds.create_player_rivalries_embed(dict(player_match), data.get("rivalries", {})),
+                    player_embeds.create_player_survivability_embed(dict(player_match), data.get("survivability", {})),
+                    player_embeds.create_player_choice_embed(dict(player_match), data.get("choice", {})),
+                    player_embeds.create_player_medals_embed(dict(player_match), data.get("medals", {})),
+                    player_embeds.create_player_penalties_embed(dict(player_match), data.get("penalties", {})),
+                ]
+                
+                all_embeds = [embed for embed in all_embeds if embed is not None]
+
+                if not all_embeds:
+                    await ctx.send("Could not build any embeds for the last match. Check logs.")
+                    return
+
+                view = player_views.MatchPaginatorView(pages=all_embeds)
+                await ctx.send(embed=all_embeds[0], view=view)
+
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+            await ctx.send("An error occurred while fetching the match. Check the bot logs.")
 
 async def setup(bot):
     await bot.add_cog(Player(bot))

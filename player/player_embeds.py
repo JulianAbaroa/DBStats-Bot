@@ -391,7 +391,7 @@ def create_player_recent_embeds(player_name: str, matches_data: list) -> list[di
             title=f"Recent games of {player_name}",
             color=discord.Color.blue()
         )
-        embed.set_footer(text=f"Página {len(pages) + 1}/{len(matches_data) // page_size + (1 if len(matches_data) % page_size else 0)}")
+        embed.set_footer(text=f"Page {len(pages) + 1}/{len(matches_data) // page_size + (1 if len(matches_data) % page_size else 0)}")
 
         for row in page_matches:
             match = dict(row)
@@ -401,13 +401,13 @@ def create_player_recent_embeds(player_name: str, matches_data: list) -> list[di
             datetime_str = match["match_timestamp"].split(".")[0]
             
             result = "Victory" if match.get("winned") else "Defeat"
-            rating = float(match.get("rating", 0))
+            rating = int(match.get("rating", "N/A"))
 
             embed.add_field(
                 name=f"Match resume: {match_type} ({match.get('gametype_name')})",
                 value=(
                     f"Result: **{result}**\n"
-                    f"Rating: {rating:.2f}\n"
+                    f"Rating: {rating}\n"
                     f"Duration: {duration}\n"
                     f"Datetime: {datetime_str}\n"
                     f"Match ID: `{match.get('match_id')}`\n"
