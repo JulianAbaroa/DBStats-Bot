@@ -55,14 +55,14 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
             
             options.append(
                 discord.SelectOption(
-                    label=f"Partida {i+1}: {gametype} - Rating {rating}",
-                    description=f"ID de partida: {match_id}",
+                    label=f"Match {i+1}: {gametype} - Rating {rating}",
+                    description=f"Match ID: {match_id}",
                     value=match_id
                 )
             )
         
         select = Select(
-            placeholder="Selecciona una ID de partida para copiarla...",
+            placeholder="Select a game ID to copy...",
             options=options,
             min_values=1,
             max_values=1,
@@ -73,9 +73,9 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
 
     async def select_callback(self, interaction: discord.Interaction):
         selected_id = interaction.data['values'][0]
-        await interaction.response.send_message(f"Copiado: `{selected_id}`", ephemeral=True)
+        await interaction.response.send_message(f"Copied: `{selected_id}`", ephemeral=True)
 
-    @button(label="Anterior", style=discord.ButtonStyle.secondary)
+    @button(label="Previous", style=discord.ButtonStyle.secondary)
     async def previous_page_callback(self, interaction: discord.Interaction, button: Button):
         if self.current_page > 0:
             self.current_page -= 1
@@ -84,7 +84,7 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
         else:
             await interaction.response.defer()
 
-    @button(label="Siguiente", style=discord.ButtonStyle.secondary)
+    @button(label="Next", style=discord.ButtonStyle.secondary)
     async def next_page_callback(self, interaction: discord.Interaction, button: Button):
         if self.current_page < len(self.pages) - 1:
             self.current_page += 1
