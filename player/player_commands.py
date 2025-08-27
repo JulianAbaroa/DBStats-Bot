@@ -261,15 +261,15 @@ class Player(commands.Cog):
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
-                query = queries.get("player_recent_matches")
-                async with db.execute(query, (player_name, n)) as cursor:
-                    player_match = await cursor.fetchone()
+                recent_matches = queries.get("player_recent_matches")
+                async with db.execute(recent_matches, (player_name, n)) as cursor:
+                    player_match = await cursor.fetchall()
 
                 if not player_match:
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
 
-            embed = player_embeds.create_player_recent_embed()
+            embed = player_embeds.create_player_recent_embed(player_name, recent_matches)
 
             if not embed:
                 await ctx.send("Could not build any embeds for the last match. Check logs.")
