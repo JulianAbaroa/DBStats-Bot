@@ -90,8 +90,12 @@ class RecentMatchesPaginatorView(View):
     async def previous_page_button(self, interaction: discord.Interaction, button: Button):
         if self.current_page > 0:
             self.current_page -= 1
+            for child in list(self.children):
+                if isinstance(child, Select):
+                    self.remove_item(child)
+                    break
+            self.add_item(self.create_select_menu())
             self.update_buttons()
-            self.children[-1] = self.create_select_menu()
             await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
         else:
             await interaction.response.defer()
@@ -100,8 +104,12 @@ class RecentMatchesPaginatorView(View):
     async def next_page_button(self, interaction: discord.Interaction, button: Button):
         if self.current_page < len(self.pages) - 1:
             self.current_page += 1
+            for child in list(self.children):
+                if isinstance(child, Select):
+                    self.remove_item(child)
+                    break
+            self.add_item(self.create_select_menu())
             self.update_buttons()
-            self.children[-1] = self.create_select_menu()
             await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
         else:
             await interaction.response.defer()
