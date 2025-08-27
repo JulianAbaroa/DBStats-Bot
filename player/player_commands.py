@@ -255,7 +255,7 @@ class Player(commands.Cog):
             try:
                 n = int(num_matches)
             except ValueError:
-                await ctx.send(f"Número de partidas inválido: {num_matches}")
+                await ctx.send(f"Invalid number of games: {num_matches}")
                 return
             
         try:
@@ -263,30 +263,26 @@ class Player(commands.Cog):
                 db.row_factory = aiosqlite.Row
                 recent_matches_query = queries.get("player_recent_matches")
                 
-                # Fetch all rows
                 async with db.execute(recent_matches_query, (player_name, n)) as cursor:
                     matches_data = await cursor.fetchall()
 
                 if not matches_data:
-                    await ctx.send(f"No se encontraron partidas para '{player_name}'")
+                    await ctx.send(f"No games were found for '{player_name}'")
                     return
                 
-                # Aquí es donde se crea la lista de embeds
                 all_embeds = player_embeds.create_player_recent_embeds(player_name, matches_data)
 
                 if not all_embeds:
-                    await ctx.send("No se pudo construir ningún embed para las partidas recientes.")
+                    await ctx.send("Could not build any embed for recent games.")
                     return
 
-                # Crea la vista de paginación con la lista de embeds
                 view = player_views.MatchPaginatorView(pages=all_embeds)
                 
-                # Envía el primer embed y la vista
                 await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
             traceback.print_exc(file=sys.stderr)
-            await ctx.send("Ocurrió un error al obtener las partidas recientes. Revisa los registros del bot.")
+            await ctx.send("An error occurred while fetching recent games. Please check the bot logs.")
 
 async def setup(bot):
     await bot.add_cog(Player(bot))

@@ -378,8 +378,8 @@ def create_player_recent_embeds(player_name: str, matches_data: list) -> list[di
 
     if not matches_data:
         embed = discord.Embed(
-            title=f"Partidas recientes de {player_name}",
-            description="No se encontraron partidas recientes para este jugador.",
+            title=f"Recent games of {player_name}",
+            description="No recent games found for this player.",
             color=discord.Color.orange()
         )
         return [embed]
@@ -388,7 +388,7 @@ def create_player_recent_embeds(player_name: str, matches_data: list) -> list[di
         page_matches = matches_data[i:i + page_size]
         
         embed = discord.Embed(
-            title=f"Partidas recientes de {player_name}",
+            title=f"Recent games of {player_name}",
             color=discord.Color.blue()
         )
         embed.set_footer(text=f"Página {len(pages) + 1}/{len(matches_data) // page_size + (1 if len(matches_data) % page_size else 0)}")
@@ -400,17 +400,17 @@ def create_player_recent_embeds(player_name: str, matches_data: list) -> list[di
             duration = format_duration(float(match["duration"]))
             datetime_str = match["match_timestamp"].split(".")[0]
             
-            result = "Victoria" if match.get("winned") else "Derrota"
+            result = "Victory" if match.get("winned") else "Defeat"
             rating = float(match.get("rating", 0))
 
             embed.add_field(
-                name=f"Resumen de la partida: {match_type} ({match.get('gametype_name')})",
+                name=f"Match resume: {match_type} ({match.get('gametype_name')})",
                 value=(
-                    f"Resultado: **{result}**\n"
+                    f"Result: **{result}**\n"
                     f"Rating: {rating:.2f}\n"
-                    f"Duración: {duration}\n"
-                    f"Fecha: {datetime_str}\n"
-                    f"ID de partida: `{match.get('match_id')}`\n"
+                    f"Duration: {duration}\n"
+                    f"Datetime: {datetime_str}\n"
+                    f"Match ID: `{match.get('match_id')}`\n"
                 ),
                 inline=False
             )
