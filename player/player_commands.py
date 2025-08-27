@@ -276,7 +276,7 @@ class Player(commands.Cog):
                     await ctx.send("Could not build any embed for recent games.")
                     return
 
-                view = player_views.MatchPaginatorView(pages=all_embeds)
+                view = player_views.RecentMatchesPaginatorView(pages=all_embeds, all_matches_data=matches_data)
                 
                 await ctx.send(embed=all_embeds[0], view=view)
 
