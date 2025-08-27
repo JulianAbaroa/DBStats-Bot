@@ -36,6 +36,14 @@ class HelpCommand(commands.HelpCommand):
             description=getattr(cog, "description", "No description"),
             color=discord.Color.green()
         )
-        cmd_list = "\n".join(f"{cmd.name} -> {cmd.help}" for cmd in cog.get_commands())
-        embed.add_field(name="Commands", value=cmd_list, inline=False)
+
+        commands_list = []
+        for cmd in cog.get_commands():
+            if isinstance(cmd, commands.Group):
+                subcmds = "\n".join(f"  {sub.name} -> {sub.help}" for sub in cmd.commands)
+                commands_list.append(f"{cmd.name} -> {cmd.help or 'No description'}\n{subcmds}")
+            else:
+                commands_list.append(f"{cmd.name} -> {cmd.help or 'No description'}")
+
+        embed.add_field(name="Commands", value="\n".join(commands_list), inline=False)
         await ctx.send(embed=embed)
