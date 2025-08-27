@@ -30,13 +30,23 @@ class MatchPaginatorView(View):
         else:
             await interaction.response.defer()
 
-class RecentMatchesPaginatorView(MatchPaginatorView):
+class RecentMatchesPaginatorView(View):
     def __init__(self, pages: list[discord.Embed], all_matches_data: list):
-        super().__init__(pages)
+        super().__init__(timeout=180)
+        self.pages = pages
         self.all_matches_data = all_matches_data
+        self.current_page = 0
         self.page_size = 5
         
+        self.add_item(self.previous_page_button)
+        self.add_item(self.next_page_button)
+        
         self.add_item(self.create_select_menu())
+        self.update_buttons()
+
+    def update_buttons(self):
+        self.children[0].disabled = (self.current_page == 0) 
+        self.children[1].disabled = (self.current_page == len(self.pages) - 1) 
 
     def get_current_page_data(self) -> list:
         start = self.current_page * self.page_size
@@ -55,14 +65,14 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
             
             options.append(
                 discord.SelectOption(
-                    label=f"Match {i+1}: {gametype} - Rating {rating}",
-                    description=f"Match ID: {match_id}",
+                    label=f"Match {self.current_page * self.page_size + i + 1}: {gametype}",
+                    description=f"Rating: {rating} | ID: {match_id}",
                     value=match_id
                 )
             )
         
         select = Select(
-            placeholder="Select a game ID to copy...",
+            placeholder="Select a Match ID to copy...",
             options=options,
             min_values=1,
             max_values=1,
@@ -73,22 +83,28 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
 
     async def select_callback(self, interaction: discord.Interaction):
         selected_id = interaction.data['values'][0]
-        await interaction.response.send_message(f"Copied: `{selected_id}`", ephemeral=True)
-
-    @button(label="Previous", style=discord.ButtonStyle.secondary)
-    async def previous_page_callback(self, interaction: discord.Interaction, button: Button):
+        await interaction.response.send_message(f"{selected_id}", ephemeral=True)
+    
+    @button(label="Previous", style=discord.ButtonStyle.secondary, custom_id="previous_button")
+    async def previous_page_button(self, interaction: discord.Interaction, button: Button):
         if self.current_page > 0:
             self.current_page -= 1
+            self.update_buttons()
+            
             self.children[-1] = self.create_select_menu()
+            
             await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
         else:
             await interaction.response.defer()
 
-    @button(label="Next", style=discord.ButtonStyle.secondary)
-    async def next_page_callback(self, interaction: discord.Interaction, button: Button):
+    @button(label="Next", style=discord.ButtonStyle.secondary, custom_id="next_button")
+    async def next_page_button(self, interaction: discord.Interaction, button: Button):
         if self.current_page < len(self.pages) - 1:
             self.current_page += 1
+            self.update_buttons()
+            
             self.children[-1] = self.create_select_menu()
+            
             await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
         else:
             await interaction.response.defer()
