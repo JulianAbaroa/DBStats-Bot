@@ -5,7 +5,7 @@ WITH recent_matches AS (
     JOIN Matches AS M ON T.match_id = M.match_id
     JOIN Profiles AS P2 ON P2.player_id = PL.player_id
     WHERE P2.player_name = ?
-    ORDER BY M.match_timestamp_DESC
+    ORDER BY M.match_timestamp DESC
     LIMIT ?
 )
 SELECT
