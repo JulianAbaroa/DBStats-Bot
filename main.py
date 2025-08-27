@@ -1,5 +1,6 @@
-import asyncio
+from help_command import HelpCommand
 from discord.ext import commands
+import asyncio
 import discord
 import bridge
 import os
@@ -10,7 +11,7 @@ if TOKEN is None:
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = commands.Bot(command_prefix='!', intents=intents, help_command=HelpCommand())
 
 @bot.event
 async def on_ready():

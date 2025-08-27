@@ -244,6 +244,5 @@ class Player(commands.Cog):
             traceback.print_exc(file=sys.stderr)
             await ctx.send("An error occurred while fetching the stats. Check the bot logs.")
 
-
 async def setup(bot):
     await bot.add_cog(Player(bot))
