@@ -24,7 +24,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="lookup")
     async def lookup(self, ctx, *, player_name: str):
-        """!player <player_name> or !player lookup <player_name> -> Shows the player's profile."""
+        """Shows the player's profile and customization."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -48,7 +48,7 @@ class Player(commands.Cog):
 
     @player_group.command(name="last")
     async def last(self, ctx, *, player_name: str):
-        """!player last <player_name> -> Shows the last saved match."""
+        """Shows the last saved match for the specified player."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -110,7 +110,7 @@ class Player(commands.Cog):
     
     @player_group.command(name="best")
     async def best(self, ctx, *, player_name: str):
-        """!player best <player_name> -> Shows the best saved match (in terms of rating)."""
+        """Shows the best saved match in terms of rating for the specified player."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -156,7 +156,6 @@ class Player(commands.Cog):
                 player_embeds.create_player_penalties_embed(player_match, data.get("penalties", {})),
             ]
             
-            # Filtrar los embeds que no se pudieron construir
             all_embeds = [embed for embed in all_embeds if embed is not None]
 
             if not all_embeds:
@@ -173,7 +172,7 @@ class Player(commands.Cog):
     @player_group.command(name="avg")
     async def avg(self, ctx, player_name: str, num_matches: str = "5"):
         """
-        !player avg <player_name> <number> -> Displays the player's average stats over their last <number> matches. 
+        Displays the player's average stats over their last `number` matches. 
         Defaults to 5 matches if number is not provided.
         """
         if num_matches.lower() == "all":

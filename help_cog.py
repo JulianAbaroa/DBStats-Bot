@@ -20,9 +20,10 @@ class HelpCommand(commands.Cog):
     def _short_help(self, cmd: commands.Command):
         return cmd.help or cmd.short_doc or "No description"
 
-    def _command_signature(self, ctx, cmd: commands.Command):
+    def _command_signature(self, cmd: commands.Command):
+        """Returns command signature with backticks, no bold."""
         sig = cmd.signature or ""
-        return f"**!{cmd.qualified_name} {sig}**".strip()
+        return f"`!{cmd.qualified_name} {sig}`".strip()
 
     @commands.command(name="help")
     async def help_command(self, ctx, *, query: str = None):
@@ -58,7 +59,6 @@ class HelpCommand(commands.Cog):
 
         q = query.strip()
         parts = q.split()
-
         maybe_cmd_name = " ".join(parts) if len(parts) > 1 else parts[0]
 
         cmd = self.bot.get_command(maybe_cmd_name)
@@ -67,12 +67,12 @@ class HelpCommand(commands.Cog):
             cmd = self.bot.get_command(joined)
 
         if cmd:
-            desc_lines = []
-            desc_lines.append(safe_truncate(cmd.help or cmd.short_doc or "No description", MAX_CMD_HELP))
+            desc_lines = [safe_truncate(cmd.help or cmd.short_doc or "No description", MAX_CMD_HELP)]
             desc_text = "\n\n".join(desc_lines)
             embed = discord.Embed(description=safe_truncate(desc_text, MAX_DESC), color=discord.Color.green())
 
-            embed.add_field(name="Usage", value=f"**!{cmd.qualified_name} {cmd.signature or ''}**".strip(), inline=False)
+            # Uso con backticks
+            embed.add_field(name="Usage", value=self._command_signature(cmd), inline=False)
 
             if isinstance(cmd, commands.Group):
                 if cmd.commands:
@@ -80,8 +80,9 @@ class HelpCommand(commands.Cog):
                     for sub in cmd.commands:
                         if sub.hidden:
                             continue
+                        sig = self._command_signature(sub)
                         help_text = safe_truncate(sub.help or sub.short_doc or "No description", MAX_CMD_HELP)
-                        sub_lines.append(f"**!{sub.qualified_name} {sub.signature or ''}**\n{help_text}")
+                        sub_lines.append(f"{sig}\n{help_text}")
                     embed.add_field(name="Subcommands", value=safe_truncate("\n\n".join(sub_lines), MAX_FIELD), inline=False)
                 else:
                     embed.add_field(name="Subcommands", value="This command group has no subcommands.", inline=False)
@@ -108,18 +109,21 @@ class HelpCommand(commands.Cog):
                 if cmd.hidden:
                     continue
                 if isinstance(cmd, commands.Group):
+                    group_sig = self._command_signature(cmd)
                     group_help = safe_truncate(cmd.help or cmd.short_doc or "No description", MAX_CMD_HELP)
                     sub_entries = []
                     for sub in cmd.commands:
                         if sub.hidden:
                             continue
+                        sub_sig = self._command_signature(sub)
                         sub_help = safe_truncate(sub.help or sub.short_doc or "No description", MAX_CMD_HELP)
-                        sub_entries.append(f"  • **!{sub.qualified_name} {sub.signature or ''}**: {sub_help}")
-                    block = f"**!{cmd.qualified_name} {cmd.signature or ''}**: {group_help}\n" + "\n".join(sub_entries)
+                        sub_entries.append(f"  • {sub_sig}: {sub_help}")
+                    block = f"{group_sig}: {group_help}\n" + "\n".join(sub_entries)
                     lines.append(block)
                 else:
+                    sig = self._command_signature(cmd)
                     help_text = safe_truncate(cmd.help or cmd.short_doc or "No description", MAX_CMD_HELP)
-                    lines.append(f"**!{cmd.qualified_name} {cmd.signature or ''}**: {help_text}")
+                    lines.append(f"{sig}: {help_text}")
 
             full_desc = "\n\n".join(lines)
             embed = discord.Embed(description=safe_truncate(full_desc, MAX_DESC), color=discord.Color.blue())
