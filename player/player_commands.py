@@ -257,19 +257,19 @@ class Player(commands.Cog):
             except ValueError:
                 await ctx.send(f"Invalid number of matches: {num_matches}")
                 return
-            
+        
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
-                recent_matches = queries.get("player_recent_matches")
-                async with db.execute(recent_matches, (player_name, n)) as cursor:
-                    player_match = await cursor.fetchall()
+                recent_matches_query = queries.get("player_recent_matches")
+                async with db.execute(recent_matches_query, (player_name, n)) as cursor:
+                    matches_data = await cursor.fetchall()
 
-                if not player_match:
+                if not matches_data:
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
 
-            embed = player_embeds.create_player_recent_embed(player_name, recent_matches)
+            embed = player_embeds.create_player_recent_embed(player_name, matches_data)
 
             if not embed:
                 await ctx.send("Could not build any embeds for the last match. Check logs.")

@@ -372,19 +372,19 @@ def create_player_penalties_embed(player_match: Dict, penalties_data: Dict) -> d
 
     return embed
 
-def create_player_recent_embed(player_data: Dict, matches_data: Dict) -> discord.Embed:
-    if not matches_data:
-        embed = discord.Embed(
-            title=f"Recent matches for {player_data['player_name']}",
-            description="No recent matches found for this player.",
-            color=discord.Color.orange()
-        )
-        return embed
-
+def create_player_recent_embed(player_name: str, matches_data: list[dict]) -> discord.Embed:
+    """
+    Creates an embed showing a player's recent matches.
+    """
     embed = discord.Embed(
-        title=f"Recent matches for {player_data['player_name']}",
+        title=f"Recent matches for {player_name}",
         color=discord.Color.blue()
     )
+
+    if not matches_data:
+        embed.description = "No recent matches found for this player."
+        embed.color = discord.Color.orange()
+        return embed
 
     for match in matches_data:
         match_type = "Matchmaking" if match.get("is_matchmaking") else "Custom Game Browser"
@@ -392,7 +392,7 @@ def create_player_recent_embed(player_data: Dict, matches_data: Dict) -> discord
         datetime_str = match["match_timestamp"].split(".")[0]
         
         result = "Victory" if match.get("winned") else "Defeat"
-        rating = int(match.get("rating", "N/A"))
+        rating = int(match.get("rating", 0))
 
         embed.add_field(
             name=f"Match Resume: {match_type} ({match.get('gametype_name')})",
