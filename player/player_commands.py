@@ -171,11 +171,20 @@ class Player(commands.Cog):
             await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
 
     @player_group.command(name="avg")
-    async def avg(self, ctx, player_name: str, num_matches: int = 5):
+    async def avg(self, ctx, player_name: str, num_matches: str = "5"):
         """
         !player avg <player_name> <number> -> Displays the player's average stats over their last <number> matches. 
         Defaults to 5 matches if number is not provided.
         """
+        if num_matches.lower() == "all":
+            n = 99999
+        else:
+            try:
+                n = int(num_matches)
+            except ValueError:
+                await ctx.send(f"Invalid number of matches: {num_matches}")
+                return
+
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
