@@ -243,7 +243,7 @@ class Player(commands.Cog):
             traceback.print_exc(file=sys.stderr)
             await ctx.send("An error occurred while fetching the stats. Check the bot logs.")
 
-    @player_group.command(name="best")
+    @player_group.command(name="recent")
     async def recent(self, ctx, player_name: str, num_matches: str = "5"):
         """
         Shows the recent matches for the specified player.
