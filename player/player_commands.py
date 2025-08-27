@@ -179,13 +179,18 @@ class Player(commands.Cog):
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
-                query = queries.get("player_stats_rating")
-                async with db.execute(query, (player_name, num_matches)) as cursor:
-                    player_match = await cursor.fetchone()
 
-                if not player_match:
+                rating_query = queries.get("player_stats_rating")
+                async with db.execute(rating_query, (player_name, num_matches)) as cursor:
+                    rating_row = await cursor.fetchone()
+
+                if not rating_row:
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
+
+                data = {}
+                player_match = dict(rating_row)
+                data["rating"] = player_match
 
                 subqueries = {
                     "combat": queries.get("player_stats_combat"),
@@ -196,16 +201,16 @@ class Player(commands.Cog):
                     "medals": queries.get("player_stats_medals"),
                     "penalties": queries.get("player_stats_penalties"),
                 }
-                data = {}
+
                 for name, query in subqueries.items():
-                    async with db.execute(query, (player_match["player_name"],)) as cursor:
+                    async with db.execute(query, (player_name, num_matches)) as cursor:
                         if name == "medals":
                             rows = await cursor.fetchall()
-                            data[name] = [dict(row) for row in rows]
+                            data[name] = [dict(row) for row in rows] if rows else []
                         else:
                             row = await cursor.fetchone()
                             data[name] = dict(row) if row else None
-            
+
             all_embeds = [
                 player_embeds.create_player_rating_embed(player_match, data.get("rating", {})),
                 player_embeds.create_player_combat_embed(player_match, data.get("combat", {})),
@@ -216,12 +221,11 @@ class Player(commands.Cog):
                 player_embeds.create_player_medals_embed(player_match, data.get("medals", {})),
                 player_embeds.create_player_penalties_embed(player_match, data.get("penalties", {})),
             ]
-            
-            # Filtrar los embeds que no se pudieron construir
+
             all_embeds = [embed for embed in all_embeds if embed is not None]
 
             if not all_embeds:
-                await ctx.send("Could not build any embeds for the last match. Check logs.")
+                await ctx.send("Could not build any embeds for the requested matches. Check logs.")
                 return
 
             view = player_views.MatchPaginatorView(pages=all_embeds)
@@ -229,8 +233,7 @@ class Player(commands.Cog):
 
         except Exception:
             traceback.print_exc(file=sys.stderr)
-            await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
-
+            await ctx.send("An error occurred while fetching the stats. Check the bot logs.")
 
 
 async def setup(bot):
