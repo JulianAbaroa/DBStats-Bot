@@ -190,7 +190,7 @@ class Player(commands.Cog):
                 db.row_factory = aiosqlite.Row
 
                 rating_query = queries.get("player_stats_rating")
-                async with db.execute(rating_query, (player_name, num_matches)) as cursor:
+                async with db.execute(rating_query, (player_name, n)) as cursor:
                     rating_row = await cursor.fetchone()
 
                 if not rating_row:
@@ -212,7 +212,7 @@ class Player(commands.Cog):
                 }
 
                 for name, query in subqueries.items():
-                    async with db.execute(query, (player_name, num_matches)) as cursor:
+                    async with db.execute(query, (player_name, n)) as cursor:
                         if name == "medals":
                             rows = await cursor.fetchall()
                             data[name] = [dict(row) for row in rows] if rows else []
