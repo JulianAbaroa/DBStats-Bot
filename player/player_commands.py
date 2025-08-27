@@ -255,33 +255,38 @@ class Player(commands.Cog):
             try:
                 n = int(num_matches)
             except ValueError:
-                await ctx.send(f"Invalid number of matches: {num_matches}")
+                await ctx.send(f"Número de partidas inválido: {num_matches}")
                 return
-        
+            
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
                 recent_matches_query = queries.get("player_recent_matches")
+                
+                # Fetch all rows
                 async with db.execute(recent_matches_query, (player_name, n)) as cursor:
                     matches_data = await cursor.fetchall()
 
                 if not matches_data:
-                    await ctx.send(f"I didn't find any games for '{player_name}'")
+                    await ctx.send(f"No se encontraron partidas para '{player_name}'")
                     return
                 
-                player_data = dict(matches_data[0])
-                
-                embed = player_embeds.create_player_recent_embed(player_data, matches_data)
+                # Aquí es donde se crea la lista de embeds
+                all_embeds = player_embeds.create_player_recent_embeds(player_name, matches_data)
 
-                if not embed:
-                    await ctx.send("Could not build any embeds for the recent matches. Check logs.")
+                if not all_embeds:
+                    await ctx.send("No se pudo construir ningún embed para las partidas recientes.")
                     return
 
-                await ctx.send(embed=embed)
+                # Crea la vista de paginación con la lista de embeds
+                view = player_views.MatchPaginatorView(pages=all_embeds)
+                
+                # Envía el primer embed y la vista
+                await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
             traceback.print_exc(file=sys.stderr)
-            await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
+            await ctx.send("Ocurrió un error al obtener las partidas recientes. Revisa los registros del bot.")
 
 async def setup(bot):
     await bot.add_cog(Player(bot))

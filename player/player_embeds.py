@@ -372,40 +372,48 @@ def create_player_penalties_embed(player_match: Dict, penalties_data: Dict) -> d
 
     return embed
 
-def create_player_recent_embed(player_data: Dict, matches_data: List[Dict]) -> discord.Embed:
-    """
-    Creates an embed showing a player's recent matches.
-    """
-    embed = discord.Embed(
-        title=f"Recent matches for {player_data['player_name']}",
-        color=discord.Color.blue()
-    )
+def create_player_recent_embeds(player_name: str, matches_data: list) -> list[discord.Embed]:
+    pages = []
+    page_size = 5
 
     if not matches_data:
-        embed.description = "No recent matches found for this player."
-        embed.color = discord.Color.orange()
-        return embed
-
-    for row in matches_data:
-        match = dict(row)
-        
-        match_type = "Matchmaking" if match.get("is_matchmaking") else "Custom Game Browser"
-        duration = format_duration(float(match["duration"]))
-        datetime_str = match["match_timestamp"].split(".")[0]
-        
-        result = "Victory" if match.get("winned") else "Defeat"
-        rating = float(match.get("rating", 0))
-
-        embed.add_field(
-            name=f"Match Resume: {match_type} ({match.get('gametype_name')})",
-            value=(
-                f"Result: **{result}**\n"
-                f"Rating: {rating:.2f}\n"
-                f"Duration: {duration}\n"
-                f"Datetime: {datetime_str}\n"
-                f"Match ID: `{match.get('match_id')}`\n"
-            ),
-            inline=False
+        embed = discord.Embed(
+            title=f"Partidas recientes de {player_name}",
+            description="No se encontraron partidas recientes para este jugador.",
+            color=discord.Color.orange()
         )
-    
-    return embed
+        return [embed]
+
+    for i in range(0, len(matches_data), page_size):
+        page_matches = matches_data[i:i + page_size]
+        
+        embed = discord.Embed(
+            title=f"Partidas recientes de {player_name}",
+            color=discord.Color.blue()
+        )
+        embed.set_footer(text=f"Página {len(pages) + 1}/{len(matches_data) // page_size + (1 if len(matches_data) % page_size else 0)}")
+
+        for row in page_matches:
+            match = dict(row)
+            
+            match_type = "Matchmaking" if match.get("is_matchmaking") else "Custom Game Browser"
+            duration = format_duration(float(match["duration"]))
+            datetime_str = match["match_timestamp"].split(".")[0]
+            
+            result = "Victoria" if match.get("winned") else "Derrota"
+            rating = float(match.get("rating", 0))
+
+            embed.add_field(
+                name=f"Resumen de la partida: {match_type} ({match.get('gametype_name')})",
+                value=(
+                    f"Resultado: **{result}**\n"
+                    f"Rating: {rating:.2f}\n"
+                    f"Duración: {duration}\n"
+                    f"Fecha: {datetime_str}\n"
+                    f"ID de partida: `{match.get('match_id')}`\n"
+                ),
+                inline=False
+            )
+        pages.append(embed)
+
+    return pages
