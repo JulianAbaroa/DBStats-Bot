@@ -11,7 +11,7 @@ WITH recent_matches AS (
 SELECT
     P.player_name,
     P.player_id,
-    AVG(rm.rating) AS avg_rating
+    AVG(rm.rating) AS rating
 FROM recent_matches rm
 JOIN Profiles AS P ON P.player_id = rm.player_id
 GROUP BY P.player_name, P.player_id;

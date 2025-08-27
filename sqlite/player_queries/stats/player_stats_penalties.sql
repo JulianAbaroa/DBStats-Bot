@@ -13,15 +13,13 @@ WITH recent_matches AS (
     ORDER BY M.match_timestamp DESC
     LIMIT ?
 )
-
-
 SELECT
     P.player_name,
     P.player_id,
-    SUM(PE.suicides)            AS total_suicides,
-    AVG(PE.suicides_per_death)  AS avg_suicides_per_death,
-    SUM(PE.betrayals)           AS total_betrayals,
-    AVG(PE.betrayals_per_kill)  AS avg_betrayals_per_kill
+    SUM(PE.suicides)            AS suicides,
+    AVG(PE.suicides_per_death)  AS suicides_per_death,
+    SUM(PE.betrayals)           AS betrayals,
+    AVG(PE.betrayals_per_kill)  AS betrayals_per_kill
 FROM recent_matches rm
 JOIN Profiles AS P ON P.player_id = rm.player_id
 JOIN Penalties AS PE ON PE.player_match_id = rm.player_match_id

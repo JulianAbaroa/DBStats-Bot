@@ -11,9 +11,9 @@ WITH recent_matches AS (
 SELECT
     P.player_name,
     P.player_id,
-    AVG(S.minutes_alive)    AS avg_minutes_alive,
-    AVG(S.minutes_played)   AS avg_minutes_played,
-    AVG(S.alive_time_ratio) AS avg_alive_time_ratio
+    AVG(S.minutes_alive)    AS minutes_alive,
+    AVG(S.minutes_played)   AS minutes_played,
+    AVG(S.alive_time_ratio) AS alive_time_ratio
 FROM recent_matches rm
 JOIN Profiles AS P ON P.player_id = rm.player_id
 JOIN Survivability AS S ON S.player_match_id = rm.player_match_id
