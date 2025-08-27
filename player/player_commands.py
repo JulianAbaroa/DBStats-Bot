@@ -172,7 +172,7 @@ class Player(commands.Cog):
     @player_group.command(name="avg")
     async def avg(self, ctx, player_name: str, num_matches: str = "5"):
         """
-        Displays the player's average stats over their last `number` matches. 
+        Shows the player's average stats over their last `number` matches. 
         Defaults to 5 matches if number is not provided.
         """
         if num_matches.lower() == "all":
@@ -242,6 +242,35 @@ class Player(commands.Cog):
         except Exception:
             traceback.print_exc(file=sys.stderr)
             await ctx.send("An error occurred while fetching the stats. Check the bot logs.")
+
+    @player_group.command(name="best")
+    async def recent(self, ctx, player_name: str, num_matches: str = "5"):
+        """
+        Shows the recent matches for the specified player.
+        Defaults to 5 matches if number is not provided.
+        """
+        try:
+            async with aiosqlite.connect(paths.DATABASE_PATH) as db:
+                db.row_factory = aiosqlite.Row
+                query = queries.get("player_recent_matches")
+                async with db.execute(query, (player_name, num_matches)) as cursor:
+                    player_match = await cursor.fetchone()
+
+                if not player_match:
+                    await ctx.send(f"I didn't find any games for '{player_name}'")
+                    return
+
+            embed = player_embeds.create_player_recent_embed()
+
+            if not embed:
+                await ctx.send("Could not build any embeds for the last match. Check logs.")
+                return
+
+            await ctx.send(embed=embed)
+
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+            await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
 
 async def setup(bot):
     await bot.add_cog(Player(bot))

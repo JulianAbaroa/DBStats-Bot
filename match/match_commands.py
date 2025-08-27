@@ -14,7 +14,7 @@ class Match(commands.Cog):
     
     @match_group.command(name="last")
     async def last_match(self, ctx):
-        """!match last -> Shows the last saved match."""
+        """Shows the last saved match."""
         async with aiosqlite.connect(paths.DATABASE_PATH) as db:
             db.row_factory = aiosqlite.Row
     

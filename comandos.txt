@@ -1,7 +1,5 @@
-!player stats player_name N (average stats of the player's last 'n' games)
-!player recent player_name N (player's last 'N' games)
-
-!player player_name match match_id (same 'last' command but with a specific game)
+!player recent player_name N (player's last 'N' games, returns the matches id's)
+!player match player_name match_id (same 'last' command but with a specific game)
 
 !player search name_fragment (list players whose name matches that fragment)
 
@@ -23,5 +21,3 @@
 
 !random player
 !random match
-
-!help
