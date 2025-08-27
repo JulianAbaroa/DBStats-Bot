@@ -247,7 +247,7 @@ class Player(commands.Cog):
     async def recent(self, ctx, player_name: str, num_matches: str = "5"):
         """
         Shows the recent matches for the specified player.
-        Defaults to 5 matches if number is not provided.
+        Defaults to 5 matches if a number is not provided.
         """
         if num_matches.lower() == "all":
             n = 99999
@@ -268,14 +268,16 @@ class Player(commands.Cog):
                 if not matches_data:
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
+                
+                player_data = dict(matches_data[0])
+                
+                embed = player_embeds.create_player_recent_embed(player_data, matches_data)
 
-            embed = player_embeds.create_player_recent_embed(player_name, matches_data)
+                if not embed:
+                    await ctx.send("Could not build any embeds for the recent matches. Check logs.")
+                    return
 
-            if not embed:
-                await ctx.send("Could not build any embeds for the last match. Check logs.")
-                return
-
-            await ctx.send(embed=embed)
+                await ctx.send(embed=embed)
 
         except Exception:
             traceback.print_exc(file=sys.stderr)
