@@ -13,4 +13,4 @@ JOIN Teams AS T ON PL.team_id = T.team_id
 JOIN Matches AS M ON T.match_id = M.match_id
 WHERE P.player_name = ?
 ORDER BY M.match_timestamp DESC
-LIMIT N;
+LIMIT ?;
