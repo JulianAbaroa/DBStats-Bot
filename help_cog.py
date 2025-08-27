@@ -118,5 +118,5 @@ class HelpCog(commands.Cog):
 
         await ctx.send(f"No help found for `{q}`. Try `!help` to list commands.")
 
-def setup(bot):
-    bot.add_cog(HelpCog(bot))
+async def setup(bot):
+    await bot.add_cog(HelpCog(bot))
