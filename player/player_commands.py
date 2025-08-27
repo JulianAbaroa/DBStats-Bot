@@ -249,11 +249,20 @@ class Player(commands.Cog):
         Shows the recent matches for the specified player.
         Defaults to 5 matches if number is not provided.
         """
+        if num_matches.lower() == "all":
+            n = 99999
+        else:
+            try:
+                n = int(num_matches)
+            except ValueError:
+                await ctx.send(f"Invalid number of matches: {num_matches}")
+                return
+            
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
                 query = queries.get("player_recent_matches")
-                async with db.execute(query, (player_name, num_matches)) as cursor:
+                async with db.execute(query, (player_name, n)) as cursor:
                     player_match = await cursor.fetchone()
 
                 if not player_match:
