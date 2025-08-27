@@ -40,7 +40,6 @@ class RecentMatchesPaginatorView(View):
         
         self.add_item(self.previous_page_button)
         self.add_item(self.next_page_button)
-        
         self.add_item(self.create_select_menu())
         
         self.update_buttons()
