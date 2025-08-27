@@ -34,8 +34,13 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
     def __init__(self, pages: list[discord.Embed], all_matches_data: list):
         super().__init__(pages)
         self.all_matches_data = all_matches_data
-        self.page_size = 5 
-        self.add_item(self.copy_ids_button) 
+        self.page_size = 5
+        
+        self.copy_ids_button = Button(label="Copy IDs", style=discord.ButtonStyle.blurple)
+        
+        self.add_item(self.copy_ids_button)
+        
+        self.copy_ids_button.callback = self.copy_ids_callback
 
     def get_current_page_ids(self) -> list[str]:
         start = self.current_page * self.page_size
@@ -43,8 +48,7 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
         current_page_data = self.all_matches_data[start:end]
         return [str(dict(row).get('match_id')) for row in current_page_data]
 
-    @button(label="Copy IDs", style=discord.ButtonStyle.blurple)
-    async def copy_ids_button(self, interaction: discord.Interaction, button: Button):
+    async def copy_ids_callback(self, interaction: discord.Interaction):
         current_ids = self.get_current_page_ids()
         ids_message = "Here are the match IDs for this page:\n" + "\n".join(f"`{mid}`" for mid in current_ids)
         await interaction.response.send_message(ids_message, ephemeral=True)
