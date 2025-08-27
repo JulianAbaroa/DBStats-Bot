@@ -1,4 +1,4 @@
-from help_command import HelpCommand
+from help_cog import HelpCog
 from discord.ext import commands
 import asyncio
 import discord
@@ -11,12 +11,12 @@ if TOKEN is None:
 
 intents = discord.Intents.default()
 intents.message_content = True
-bot = commands.Bot(command_prefix='!', intents=intents, help_command=HelpCommand())
+bot = commands.Bot(command_prefix='!', intents=intents)
+bot.help_command = None
 
 @bot.event
 async def on_ready():
     print(f'Bot started as {bot.user}')
-    # Inicia la tarea de procesamiento en el fondo
     bot.loop.create_task(process_history())
 
 async def process_history():
@@ -35,6 +35,7 @@ async def setup_extensions():
     await bot.load_extension("dbstats.dbstats_commands")
     await bot.load_extension("player.player_commands")
     await bot.load_extension("match.match_commands")
+    await bot.load_extension("help_cog")
 
 if __name__ == "__main__":
     asyncio.run(setup_extensions())
