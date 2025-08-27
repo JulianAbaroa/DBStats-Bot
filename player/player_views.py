@@ -42,11 +42,12 @@ class RecentMatchesPaginatorView(View):
         self.add_item(self.next_page_button)
         
         self.add_item(self.create_select_menu())
+        
         self.update_buttons()
 
     def update_buttons(self):
-        self.children[0].disabled = (self.current_page == 0) 
-        self.children[1].disabled = (self.current_page == len(self.pages) - 1) 
+        self.children[0].disabled = (self.current_page == 0)
+        self.children[1].disabled = (self.current_page == len(self.pages) - 1)
 
     def get_current_page_data(self) -> list:
         start = self.current_page * self.page_size
@@ -57,6 +58,9 @@ class RecentMatchesPaginatorView(View):
         options = []
         current_page_data = self.get_current_page_data()
         
+        if not current_page_data:
+            return Select(placeholder="No data available", options=[])
+
         for i, row in enumerate(current_page_data):
             match = dict(row)
             match_id = str(match.get('match_id'))
@@ -72,7 +76,7 @@ class RecentMatchesPaginatorView(View):
             )
         
         select = Select(
-            placeholder="Select a Match ID to copy...",
+            placeholder="Select a match ID to copy...",
             options=options,
             min_values=1,
             max_values=1,
@@ -90,9 +94,7 @@ class RecentMatchesPaginatorView(View):
         if self.current_page > 0:
             self.current_page -= 1
             self.update_buttons()
-            
             self.children[-1] = self.create_select_menu()
-            
             await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
         else:
             await interaction.response.defer()
@@ -102,9 +104,7 @@ class RecentMatchesPaginatorView(View):
         if self.current_page < len(self.pages) - 1:
             self.current_page += 1
             self.update_buttons()
-            
             self.children[-1] = self.create_select_menu()
-            
             await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
         else:
             await interaction.response.defer()
