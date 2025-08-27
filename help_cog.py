@@ -11,7 +11,7 @@ def safe_truncate(s: str, limit: int):
     s = str(s).strip()
     return s if len(s) <= limit else s[:limit-1] + "…"
 
-class HelpCog(commands.Cog):
+class HelpCommand(commands.Cog):
     """Custom help command (use: !help, !help <cog|command>)"""
 
     def __init__(self, bot):
@@ -21,16 +21,14 @@ class HelpCog(commands.Cog):
         return cmd.help or cmd.short_doc or "No description"
 
     def _command_signature(self, ctx, cmd: commands.Command):
-        prefix = ctx.prefix or "!"
         sig = cmd.signature or ""
-        return f"**`{prefix}{cmd.qualified_name} {sig}`**".strip()
+        return f"**!{cmd.qualified_name} {sig}**".strip()
 
     @commands.command(name="help")
     async def help_command(self, ctx, *, query: str = None):
         """
-        Usage:
-         - !help
          - !help player
+         - !help match
         """
         if not query:
             embed = discord.Embed(title="Bot Commands", color=discord.Color.blue())
@@ -42,8 +40,7 @@ class HelpCog(commands.Cog):
                 lines = []
                 for cmd in cmds:
                     lines.append(f"{safe_truncate(self._short_help(cmd), MAX_CMD_HELP)}")
-                field_name = f"{cog_name}"
-                embed.add_field(name=field_name, value=safe_truncate("\n".join(lines), MAX_FIELD), inline=False)
+                embed.add_field(name=cog_name, value=safe_truncate("\n".join(lines), MAX_FIELD), inline=False)
 
             others = [c for c in self.bot.walk_commands() if not c.cog_name and not c.hidden]
             if others:
@@ -75,7 +72,7 @@ class HelpCog(commands.Cog):
             desc_text = "\n\n".join(desc_lines)
             embed = discord.Embed(description=safe_truncate(desc_text, MAX_DESC), color=discord.Color.green())
 
-            embed.add_field(name="Usage", value=self._command_signature(ctx, cmd), inline=False)
+            embed.add_field(name="Usage", value=f"**!{cmd.qualified_name} {cmd.signature or ''}**".strip(), inline=False)
 
             if isinstance(cmd, commands.Group):
                 if cmd.commands:
@@ -83,9 +80,8 @@ class HelpCog(commands.Cog):
                     for sub in cmd.commands:
                         if sub.hidden:
                             continue
-                        sig = self._command_signature(ctx, sub)
                         help_text = safe_truncate(sub.help or sub.short_doc or "No description", MAX_CMD_HELP)
-                        sub_lines.append(f"{sig}\n{help_text}")
+                        sub_lines.append(f"**!{sub.qualified_name} {sub.signature or ''}**\n{help_text}")
                     embed.add_field(name="Subcommands", value=safe_truncate("\n\n".join(sub_lines), MAX_FIELD), inline=False)
                 else:
                     embed.add_field(name="Subcommands", value="This command group has no subcommands.", inline=False)
@@ -112,21 +108,18 @@ class HelpCog(commands.Cog):
                 if cmd.hidden:
                     continue
                 if isinstance(cmd, commands.Group):
-                    group_sig = self._command_signature(ctx, cmd)
                     group_help = safe_truncate(cmd.help or cmd.short_doc or "No description", MAX_CMD_HELP)
                     sub_entries = []
                     for sub in cmd.commands:
                         if sub.hidden:
                             continue
-                        sub_sig = self._command_signature(ctx, sub)
                         sub_help = safe_truncate(sub.help or sub.short_doc or "No description", MAX_CMD_HELP)
-                        sub_entries.append(f"  • {sub_sig}: {sub_help}")
-                    block = f"**{group_sig}**: {group_help}\n" + "\n".join(sub_entries)
+                        sub_entries.append(f"  • **!{sub.qualified_name} {sub.signature or ''}**: {sub_help}")
+                    block = f"**!{cmd.qualified_name} {cmd.signature or ''}**: {group_help}\n" + "\n".join(sub_entries)
                     lines.append(block)
                 else:
-                    sig = self._command_signature(ctx, cmd)
                     help_text = safe_truncate(cmd.help or cmd.short_doc or "No description", MAX_CMD_HELP)
-                    lines.append(f"**{sig}**: {help_text}")
+                    lines.append(f"**!{cmd.qualified_name} {cmd.signature or ''}**: {help_text}")
 
             full_desc = "\n\n".join(lines)
             embed = discord.Embed(description=safe_truncate(full_desc, MAX_DESC), color=discord.Color.blue())
@@ -136,4 +129,4 @@ class HelpCog(commands.Cog):
         await ctx.send(f"No help found for `{q}`. Try `!help` to list commands.")
 
 async def setup(bot):
-    await bot.add_cog(HelpCog(bot))
+    await bot.add_cog(HelpCommand(bot))

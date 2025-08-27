@@ -1,4 +1,4 @@
-from help_cog import HelpCog
+from help_cog import HelpCommand
 from discord.ext import commands
 import asyncio
 import discord
