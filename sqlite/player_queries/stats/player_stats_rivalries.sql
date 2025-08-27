@@ -13,7 +13,7 @@ most_killed AS (
     SELECT 
         rm.player_id,
         R.most_killed_player AS rival,
-        SUM(R.most_killed_count) AS total_kills,
+        AVG(R.most_killed_count) AS total_kills,
         AVG(R.most_killed_kill_ratio) AS avg_kill_ratio
     FROM recent_matches rm
     JOIN Rivalries R ON R.player_match_id = rm.player_match_id
@@ -26,7 +26,7 @@ most_killer AS (
     SELECT 
         rm.player_id,
         R.most_killer_player AS rival,
-        SUM(R.most_killer_count) AS total_kills_against,
+        AVG(R.most_killer_count) AS total_kills_against,
         AVG(R.most_killer_death_ratio) AS avg_death_ratio
     FROM recent_matches rm
     JOIN Rivalries R ON R.player_match_id = rm.player_match_id

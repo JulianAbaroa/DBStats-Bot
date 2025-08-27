@@ -16,9 +16,9 @@ WITH recent_matches AS (
 SELECT
     P.player_name,
     P.player_id,
-    SUM(PE.suicides)            AS suicides,
+    AVG(PE.suicides)            AS suicides,
     AVG(PE.suicides_per_death)  AS suicides_per_death,
-    SUM(PE.betrayals)           AS betrayals,
+    AVG(PE.betrayals)           AS betrayals,
     AVG(PE.betrayals_per_kill)  AS betrayals_per_kill
 FROM recent_matches rm
 JOIN Profiles AS P ON P.player_id = rm.player_id

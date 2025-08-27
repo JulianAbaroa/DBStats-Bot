@@ -16,7 +16,7 @@ SELECT
     P.player_name,
     P.player_id,
     CH.most_used_weapon,
-    SUM(CH.most_used_weapon_kills)       AS most_used_weapon_kills,
+    AVG(CH.most_used_weapon_kills)       AS most_used_weapon_kills,
     AVG(CH.most_used_weapon_kills_ratio) AS most_used_weapon_kills_ratio
 FROM recent_matches rm
 JOIN Profiles AS P ON P.player_id = rm.player_id

@@ -11,11 +11,11 @@ WITH recent_matches AS (
 SELECT
     P.player_name,
     P.player_id,
-    SUM(ME.total_medals)        AS total_medals,
+    AVG(ME.total_medals)        AS total_medals,
     AVG(ME.medals_per_kill)     AS medals_per_kill,
     AVG(ME.medals_per_minute)   AS medals_per_minute,
     MI.medal_type,
-    SUM(MI.count)               AS count
+    AVG(MI.count)               AS count
 FROM recent_matches rm
 JOIN Profiles AS P ON P.player_id = rm.player_id
 JOIN Medals AS ME ON ME.player_match_id = rm.player_match_id
