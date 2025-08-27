@@ -41,8 +41,8 @@ class HelpCog(commands.Cog):
                     continue
                 lines = []
                 for cmd in cmds:
-                    lines.append(f"**{cmd.name}**: {safe_truncate(self._short_help(cmd), MAX_CMD_HELP)}")
-                field_name = f"{cog_name} -"
+                    lines.append(f"{safe_truncate(self._short_help(cmd), MAX_CMD_HELP)}")
+                field_name = f"{cog_name}"
                 embed.add_field(name=field_name, value=safe_truncate("\n".join(lines), MAX_FIELD), inline=False)
 
             others = [c for c in self.bot.walk_commands() if not c.cog_name and not c.hidden]
@@ -52,9 +52,9 @@ class HelpCog(commands.Cog):
                 for cmd in others:
                     if cmd.name in listed:
                         continue
-                    lines.append(f"**{cmd.name}**: {safe_truncate(self._short_help(cmd), MAX_CMD_HELP)}")
+                    lines.append(f"{safe_truncate(self._short_help(cmd), MAX_CMD_HELP)}")
                     listed.add(cmd.name)
-                embed.add_field(name="No Category -", value=safe_truncate("\n".join(lines), MAX_FIELD), inline=False)
+                embed.add_field(name="No Category", value=safe_truncate("\n".join(lines), MAX_FIELD), inline=False)
 
             await ctx.send(embed=embed)
             return
