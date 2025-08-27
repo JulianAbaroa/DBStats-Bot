@@ -10,7 +10,7 @@ class Match(commands.Cog):
     @commands.group(name="match", invoke_without_command=True)
     async def match_group(self, ctx):   
         """Match-related commands (last, etc)."""
-        await ctx.send("Use !help match to see all available subcommands.")
+        await ctx.send("Use `!help match` to see all available subcommands.")
     
     @match_group.command(name="last")
     async def last_match(self, ctx):

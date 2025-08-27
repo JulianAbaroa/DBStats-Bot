@@ -15,15 +15,15 @@ class Player(commands.Cog):
 
     @commands.group(name="player", invoke_without_command=True)
     async def player_group(self, ctx, *, arg: str = None):
-        """Player-related commands (lookup, last, best, etc). Arguments: player_name: The name of the player to be consulted."""
+        """Player-related commands (lookup, last, best, etc)."""
         if arg is None:
-            await ctx.send("Use !help player to see all available subcommands.")
+            await ctx.send("Use `!help player` to see all available subcommands.")
             return
 
-        await ctx.invoke(self.player_lookup, player_name=arg)
+        await ctx.invoke(self.lookup, player_name=arg)
 
     @player_group.command(name="lookup")
-    async def player_lookup(self, ctx, *, player_name: str):
+    async def lookup(self, ctx, *, player_name: str):
         """!player <player_name> or !player lookup <player_name> -> Shows the player's profile."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
@@ -110,7 +110,7 @@ class Player(commands.Cog):
     
     @player_group.command(name="best")
     async def best(self, ctx, *, player_name: str):
-        """`!player best <player_name>` -> Shows the best saved match (in terms of rating)."""
+        """!player best <player_name> -> Shows the best saved match (in terms of rating)."""
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
@@ -169,6 +169,68 @@ class Player(commands.Cog):
         except Exception:
             traceback.print_exc(file=sys.stderr)
             await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
+
+    @player_group.command(name="stats")
+    async def stats(self, ctx, player_name: str, num_matches: int = 5):
+        """
+        !player stats <player_name> <number> -> Displays the player's average stats over their last <number> matches. 
+        Defaults to 5 matches if number is not provided.
+        """
+        try:
+            async with aiosqlite.connect(paths.DATABASE_PATH) as db:
+                db.row_factory = aiosqlite.Row
+                query = queries.get("player_stats_rating")
+                async with db.execute(query, (player_name, num_matches)) as cursor:
+                    player_match = await cursor.fetchone()
+
+                if not player_match:
+                    await ctx.send(f"I didn't find any games for '{player_name}'")
+                    return
+
+                subqueries = {
+                    "combat": queries.get("player_stats_combat"),
+                    "breakdown": queries.get("player_stats_breakdown"),
+                    "rivalries": queries.get("player_stats_rivalries"),
+                    "survivability": queries.get("player_stats_survivability"),
+                    "choice": queries.get("player_stats_choice"),
+                    "medals": queries.get("player_stats_medals"),
+                    "penalties": queries.get("player_stats_penalties"),
+                }
+                data = {}
+                for name, query in subqueries.items():
+                    async with db.execute(query, (player_match["player_name"],)) as cursor:
+                        if name == "medals":
+                            rows = await cursor.fetchall()
+                            data[name] = [dict(row) for row in rows]
+                        else:
+                            row = await cursor.fetchone()
+                            data[name] = dict(row) if row else None
+            
+            all_embeds = [
+                player_embeds.create_player_rating_embed(player_match, data.get("rating", {})),
+                player_embeds.create_player_combat_embed(player_match, data.get("combat", {})),
+                player_embeds.create_player_breakdown_embed(player_match, data.get("breakdown", {})),
+                player_embeds.create_player_rivalries_embed(player_match, data.get("rivalries", {})),
+                player_embeds.create_player_survivability_embed(player_match, data.get("survivability", {})),
+                player_embeds.create_player_choice_embed(player_match, data.get("choice", {})),
+                player_embeds.create_player_medals_embed(player_match, data.get("medals", {})),
+                player_embeds.create_player_penalties_embed(player_match, data.get("penalties", {})),
+            ]
+            
+            # Filtrar los embeds que no se pudieron construir
+            all_embeds = [embed for embed in all_embeds if embed is not None]
+
+            if not all_embeds:
+                await ctx.send("Could not build any embeds for the last match. Check logs.")
+                return
+
+            view = player_views.MatchPaginatorView(pages=all_embeds)
+            await ctx.send(embed=all_embeds[0], view=view)
+
+        except Exception:
+            traceback.print_exc(file=sys.stderr)
+            await ctx.send("An error occurred while fetching the last match. Check the bot logs.")
+
 
 
 async def setup(bot):

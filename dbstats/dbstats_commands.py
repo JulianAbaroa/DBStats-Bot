@@ -6,6 +6,7 @@ class DBStats(commands.Cog):
 
     @commands.group(name="dbstats", invoke_without_command=True)
     async def dbstats_group(self, ctx, *, arg: str = None):
+        """Dbstats-related commands (none)"""
         if arg is None:
             await ctx.send("GIVE ME DATAAAA")
             return

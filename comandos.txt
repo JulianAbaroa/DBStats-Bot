@@ -1,4 +1,3 @@
-!player best player_name (best game)
 !player stats player_name N (average stats of the player's last 'n' games)
 !player recent player_name N (player's last 'N' games)
 
