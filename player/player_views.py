@@ -1,4 +1,4 @@
-from discord.ui import View, button, Button
+from discord.ui import View, button, Button, Select
 import discord
 
 class MatchPaginatorView(View):
@@ -36,19 +36,59 @@ class RecentMatchesPaginatorView(MatchPaginatorView):
         self.all_matches_data = all_matches_data
         self.page_size = 5
         
-        self.copy_ids_button = Button(label="Copy IDs", style=discord.ButtonStyle.blurple)
-        
-        self.add_item(self.copy_ids_button)
-        
-        self.copy_ids_button.callback = self.copy_ids_callback
+        self.add_item(self.create_select_menu())
 
-    def get_current_page_ids(self) -> list[str]:
+    def get_current_page_data(self) -> list:
         start = self.current_page * self.page_size
         end = start + self.page_size
-        current_page_data = self.all_matches_data[start:end]
-        return [str(dict(row).get('match_id')) for row in current_page_data]
+        return self.all_matches_data[start:end]
 
-    async def copy_ids_callback(self, interaction: discord.Interaction):
-        current_ids = self.get_current_page_ids()
-        ids_message = "Here are the match IDs for this page:\n" + "\n".join(f"`{mid}`" for mid in current_ids)
-        await interaction.response.send_message(ids_message, ephemeral=True)
+    def create_select_menu(self) -> Select:
+        options = []
+        current_page_data = self.get_current_page_data()
+        
+        for i, row in enumerate(current_page_data):
+            match = dict(row)
+            match_id = str(match.get('match_id'))
+            gametype = match.get('gametype_name')
+            rating = int(match.get('rating'))
+            
+            options.append(
+                discord.SelectOption(
+                    label=f"Partida {i+1}: {gametype} - Rating {rating}",
+                    description=f"ID de partida: {match_id}",
+                    value=match_id
+                )
+            )
+        
+        select = Select(
+            placeholder="Selecciona una ID de partida para copiarla...",
+            options=options,
+            min_values=1,
+            max_values=1,
+            custom_id="match_select_menu"
+        )
+        select.callback = self.select_callback
+        return select
+
+    async def select_callback(self, interaction: discord.Interaction):
+        selected_id = interaction.data['values'][0]
+        await interaction.response.send_message(f"Copiado: `{selected_id}`", ephemeral=True)
+
+    @button(label="Anterior", style=discord.ButtonStyle.secondary)
+    async def previous_page_callback(self, interaction: discord.Interaction, button: Button):
+        if self.current_page > 0:
+            self.current_page -= 1
+            self.children[-1] = self.create_select_menu()
+            await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
+        else:
+            await interaction.response.defer()
+
+    @button(label="Siguiente", style=discord.ButtonStyle.secondary)
+    async def next_page_callback(self, interaction: discord.Interaction, button: Button):
+        if self.current_page < len(self.pages) - 1:
+            self.current_page += 1
+            self.children[-1] = self.create_select_menu()
+            await interaction.response.edit_message(embed=self.pages[self.current_page], view=self)
+        else:
+            await interaction.response.defer()
