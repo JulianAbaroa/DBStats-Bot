@@ -1,4 +1,5 @@
 from dictionaries.medal_emojis import medal_emojis
+from dictionaries import gametypes_ids
 from datetime import datetime
 from typing import Dict, Callable, Optional, Any, List
 import discord
@@ -17,7 +18,6 @@ def format_duration(duration_minutes: float) -> str:
     return f"{minutes}m {seconds}s"
 
 def _get_stat(stats: Optional[Dict[str, Any]], *keys, default=None):
-    """Devuelve la primera key existente en stats o default."""
     if not stats:
         return default
     for k in keys:
@@ -153,14 +153,12 @@ def create_player_rating_embed(player_match: Dict, info: Dict) -> discord.Embed:
 
     return embed
 
-import discord
-from typing import Dict, Any, Optional, Callable, List
-
-
-
 def create_player_gametype_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    gametype_raw = player_match.get("gametype_name") or str(player_match.get("gametype") or "")
-    gametype_key = str(gametype_raw).strip().lower().replace(" ", "").replace("-", "").replace("_", "")
+    gametype_id = player_match.get("gametype")
+    gametype_key = gametypes_ids.gametypes_ids_to_names.get(gametype_id)
+
+    if not gametype_key:
+        gametype_key = str(player_match.get("gametype_name", "")).strip().lower().replace(" ", "").replace("-", "").replace("_", "")
 
     gametype_handlers: Dict[str, Callable[[Dict[str, Any], Optional[Dict[str, Any]]], discord.Embed]] = {
         "slayer": _create_player_slayer_embed,
@@ -181,152 +179,231 @@ def create_player_gametype_embed(player_match: Dict[str, Any], stats: Optional[D
     handler = gametype_handlers.get(gametype_key, _create_generic_gametype_embed)
     return handler(player_match, stats)
 
-# --- Handlers (ejemplos corregidos y robustos) ---
-
 def _create_player_slayer_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     embed = discord.Embed(
-        title=f"Slayer — {player_match.get('player_name', 'Unknown')}",
+        title=f"Slayer for {player_match.get('player_name', 'Unknown')}",
         color=discord.Color.blue()
     )
     if not stats:
-        embed.description = "No hay estadísticas específicas de Slayer para esta partida."
+        embed.description = "There are no specific Slayer stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
 
     rating = _get_stat(stats, "rating", "slayer_rating", "player_rating")
-    embed.add_field(name="Rating", value=truncate_float(rating), inline=False)
+    embed.add_field(name="Statistics", value=f"Rating: {truncate_float(rating)}", inline=False)
     return embed
 
 def _create_player_ctf_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    embed = discord.Embed(title=f"CTF — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    embed = discord.Embed(title=f"CTF for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de CTF para esta partida."
+        embed.description = "There are no specific CTF stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
 
     captures = _get_stat(stats, "flag_captures", "captures")
     recovers = _get_stat(stats, "flag_recovers", "recovers")
     carry_time = _get_stat(stats, "flag_carry_time", "carry_time")
-    embed.add_field(name="Flags Capturadas", value=str(captures or 0), inline=True)
-    embed.add_field(name="Recovers", value=str(recovers or 0), inline=True)
-    embed.add_field(name="Carrier time (s)", value=truncate_float(carry_time), inline=True)
+
+    carry_time_formatted = format_duration(carry_time)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Flag captures: {captures}\n"
+            f"Flag recovers: {recovers}\n"
+            f"Carry time: {carry_time_formatted}\n"
+        ), inline=True
+    )
+
     return embed
 
 def _create_player_oddball_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    embed = discord.Embed(title=f"Oddball — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    embed = discord.Embed(title=f"Oddball for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Oddball para esta partida."
+        embed.description = "There are no specific Oddball stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
 
     carry_time = _get_stat(stats, "carry_time", "oddball_carry_time")
+    carry_time_formatted = format_duration(carry_time)
+
     ball_kills = _get_stat(stats, "ball_kills")
-    embed.add_field(name="Carry time (s)", value=truncate_float(carry_time), inline=True)
-    embed.add_field(name="Ball kills", value=str(ball_kills or 0), inline=True)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Carry time: {carry_time_formatted}\n"
+            f"Ball kills: {ball_kills}"
+        ), inline=True
+    )
+
     return embed
 
 def _create_player_koth_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    embed = discord.Embed(title=f"KOTH — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    embed = discord.Embed(title=f"KOTH for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de KOTH para esta partida."
+        embed.description = "There are no specific KOTH stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
 
     hill_time = _get_stat(stats, "time_in_hill", "hill_time")
-    embed.add_field(name="Time in hill (s)", value=truncate_float(hill_time), inline=True)
+    hill_time_formatted = format_duration(hill_time)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Time in hill: {hill_time_formatted}"
+        ), inline=True
+    )
+
     return embed
 
 def _create_player_juggernaut_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    embed = discord.Embed(title=f"Juggernaut — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    embed = discord.Embed(title=f"Juggernaut for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Juggernaut para esta partida."
+        embed.description = "There are no specific Juggernaut stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
 
     time = _get_stat(stats, "juggernaut_time")
-    embed.add_field(name="Juggernaut time (s)", value=truncate_float(time), inline=True)
+    time_formatted = format_duration(time)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Juggernaut time: {time_formatted}"
+        ), inline=True)
+
     return embed
 
 def _create_player_infection_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    embed = discord.Embed(title=f"Infection — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    embed = discord.Embed(title=f"Infection for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Infection para esta partida."
+        embed.description = "There are no specific Infection stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
 
     survival = _get_stat(stats, "survival_time", "infection_survival_time")
+    survival_formatted = format_duration(survival)
+
     infections = _get_stat(stats, "infections", "infection_count")
-    embed.add_field(name="Survival time (s)", value=truncate_float(survival), inline=True)
-    embed.add_field(name="Infections", value=str(infections or 0), inline=True)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Survival time: {survival_formatted}\n"
+            f"Infections: {infections}\n"
+        ), inline=True
+    )
+    
     return embed
 
 def _create_player_territories_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    embed = discord.Embed(title=f"Territories — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    embed = discord.Embed(title=f"Territories for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Territories para esta partida."
+        embed.description = "There are no specific Territories stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
+    
     captures = _get_stat(stats, "captures", "territories_captures")
-    embed.add_field(name="Captures", value=str(captures or 0), inline=True)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Captures: {captures}"
+        ), inline=True
+    )
+
     return embed
 
 def _create_player_assault_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     embed = discord.Embed(title=f"Assault — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Assault para esta partida."
+        embed.description = "There are no specific Assault stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
+    
     bombs = _get_stat(stats, "bombs_planted")
     det = _get_stat(stats, "detonations")
     carry = _get_stat(stats, "bomb_carry_time", "bomb_carry_time")
+    carry_formatted = format_duration(carry)
     defuses = _get_stat(stats, "defuses")
-    embed.add_field(name="Bombs planted", value=str(bombs or 0), inline=True)
-    embed.add_field(name="Detonations", value=str(det or 0), inline=True)
-    embed.add_field(name="Bomb carry time (s)", value=truncate_float(carry), inline=True)
-    embed.add_field(name="Defuses", value=str(defuses or 0), inline=True)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Bombs planted: {bombs}\n"
+            f"Detonations: {det}\n"
+            f"Carry time: {carry_formatted}\n"
+            f"Defuses: {defuses}\n"
+        ), inline=True
+    )
+
     return embed
 
 def _create_player_stockpile_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     embed = discord.Embed(title=f"Stockpile — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Stockpile para esta partida."
+        embed.description = "There are no specific Stockpile stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
+    
     carry = _get_stat(stats, "carry_time", "stockpile_carry_time")
-    embed.add_field(name="Carry time (s)", value=truncate_float(carry), inline=True)
+    carry_formatted = format_duration(carry)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Carry time: {carry_formatted}"
+        ), inline=True
+    )
+
     return embed
 
 def _create_player_headhunter_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     embed = discord.Embed(title=f"Headhunter — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de Headhunter para esta partida."
+        embed.description = "There are no specific Headhunter stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
+    
     max_skulls = _get_stat(stats, "max_skulls", "headhunter_max_skulls")
-    embed.add_field(name="Max skulls", value=str(max_skulls or 0), inline=True)
+
+    embed.add_field(
+        name="Statistics", 
+        value=(
+            f"Max skulls: {max_skulls}"
+        ), 
+        inline=True
+    )
+
     return embed
 
 def _create_player_actionsack_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     embed = discord.Embed(title=f"ActionSack — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
     if not stats:
-        embed.description = "No hay estadísticas de ActionSack para esta partida."
+        embed.description = "There are no specific ActionSack stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
         return embed
-    embed.add_field(name="Notes", value="No specific stats", inline=False)
+    
+    embed.add_field(name="Statistics", value="No specific stats", inline=False)
+
     return embed
 
 def _create_generic_gametype_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    title = f"{player_match.get('gametype_name') or player_match.get('gametype') or 'Gametype'} — Statistics"
+    title = f"{player_match.get('gametype_name') or player_match.get('gametype') or 'Gametype'} Statistics"
     embed = discord.Embed(title=title, color=0x95a5a6)
     embed.set_author(name=player_match.get('player_name') or "Unknown")
     if not stats:
-        embed.description = "No hay estadísticas específicas para este gametype."
+        embed.description = "There are no specific stats for this gametype."
         return embed
+    
     for k, v in list(stats.items())[:10]:
         if isinstance(v, (list, tuple)):
             embed.add_field(name=k, value=", ".join(str(i) for i in v) or "—", inline=True)
         else:
             embed.add_field(name=k, value=str(v), inline=True)
+
     return embed
 
 def create_player_combat_embed(player_match: Dict, combat_data: Dict) -> discord.Embed:

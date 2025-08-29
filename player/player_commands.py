@@ -1,4 +1,5 @@
 from sqlite.query_loader import QueryLoader
+from dictionaries import gametypes_ids
 from player import player_views
 from views import paginator_view
 from player import player_embeds
@@ -122,7 +123,12 @@ class Player(commands.Cog):
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
                 
-                gametype_name = (player_match["gametype_name"] if "gametype_name" in player_match.keys() else player_match["gametype"]).lower()
+                gametype_id = player_match["gametype"]
+                gametype_name = gametypes_ids.gametypes_ids_to_names.get(gametype_id)
+                if gametype_name:
+                    gametype_name = gametype_name.lower()
+                else:
+                    gametype_name = player_match.get("gametype_name", "").lower()
 
                 gametype_map = {
                     "slayer": "player_best_slayer",
