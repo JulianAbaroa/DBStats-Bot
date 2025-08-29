@@ -122,7 +122,7 @@ class Player(commands.Cog):
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
                 
-                gametype_name = (player_match.get("gametype_name") or str(player_match.get("gametype")) or "").lower()
+                gametype_name = (player_match["gametype_name"] if "gametype_name" in player_match.keys() else player_match["gametype"]).lower()
 
                 gametype_map = {
                     "slayer": "player_best_slayer",
