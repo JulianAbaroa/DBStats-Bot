@@ -3,7 +3,7 @@ import discord
 
 class RecentPaginatorView(View):
     def __init__(self, pages: list[discord.Embed], all_matches_data: list):
-        super().__init__()
+        super().__init__(timeout=None)
         self.pages = pages
         self.all_matches_data = all_matches_data
         self.current_page = 0

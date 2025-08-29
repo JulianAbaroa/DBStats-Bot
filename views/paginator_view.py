@@ -3,7 +3,7 @@ import discord
 
 class PaginatorView(View):
     def __init__(self, pages: list[discord.Embed]):
-        super().__init__()
+        super().__init__(timeout=None)
         self.pages = pages
         self.current_page = 0
         self.update_buttons()
