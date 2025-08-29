@@ -172,7 +172,7 @@ class Player(commands.Cog):
                     params = None  
 
                     if name == "gametype":
-                        player_match_id = player_match.get("player_match_id")
+                        player_match_id = dict(player_match).get("player_match_id")
                         if player_match_id is not None:
                             params = (player_match_id,)
                     else:
