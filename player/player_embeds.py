@@ -1,8 +1,10 @@
 from dictionaries.medal_emojis import medal_emojis
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, Callable, Optional, Any, List
 import discord
 import os
+
+# TODO: Agregar un embed que muestre los stats del gametype.
 
 def format_duration(duration_minutes: float) -> str:
     try:
@@ -13,6 +15,15 @@ def format_duration(duration_minutes: float) -> str:
     minutes = int(duration_minutes)
     seconds = int((duration_minutes - minutes) * 60)
     return f"{minutes}m {seconds}s"
+
+def _get_stat(stats: Optional[Dict[str, Any]], *keys, default=None):
+    """Devuelve la primera key existente en stats o default."""
+    if not stats:
+        return default
+    for k in keys:
+        if k in stats and stats[k] is not None:
+            return stats[k]
+    return default
 
 def truncate_float(x, decimals=3):
     try:
@@ -119,7 +130,7 @@ def create_player_team_embed(player_match: Dict, team_data: Dict) -> discord.Emb
     )
 
     embed.add_field(
-        name="Team Resume:", 
+        name="Team Resume", 
         value=(
             f"Team: {team_data['color']}\n"
             f"Team rating: {rating}\n"
@@ -142,6 +153,182 @@ def create_player_rating_embed(player_match: Dict, info: Dict) -> discord.Embed:
 
     return embed
 
+import discord
+from typing import Dict, Any, Optional, Callable, List
+
+
+
+def create_player_gametype_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    gametype_raw = player_match.get("gametype_name") or str(player_match.get("gametype") or "")
+    gametype_key = str(gametype_raw).strip().lower().replace(" ", "").replace("-", "").replace("_", "")
+
+    gametype_handlers: Dict[str, Callable[[Dict[str, Any], Optional[Dict[str, Any]]], discord.Embed]] = {
+        "slayer": _create_player_slayer_embed,
+        "capturetheflag": _create_player_ctf_embed,
+        "ctf": _create_player_ctf_embed,
+        "oddball": _create_player_oddball_embed,
+        "kingofthehill": _create_player_koth_embed,
+        "koth": _create_player_koth_embed,
+        "juggernaut": _create_player_juggernaut_embed,
+        "infection": _create_player_infection_embed,
+        "territories": _create_player_territories_embed,
+        "assault": _create_player_assault_embed,
+        "stockpile": _create_player_stockpile_embed,
+        "headhunter": _create_player_headhunter_embed,
+        "actionsack": _create_player_actionsack_embed
+    }
+
+    handler = gametype_handlers.get(gametype_key, _create_generic_gametype_embed)
+    return handler(player_match, stats)
+
+# --- Handlers (ejemplos corregidos y robustos) ---
+
+def _create_player_slayer_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(
+        title=f"Slayer — {player_match.get('player_name', 'Unknown')}",
+        color=discord.Color.blue()
+    )
+    if not stats:
+        embed.description = "No hay estadísticas específicas de Slayer para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+
+    rating = _get_stat(stats, "rating", "slayer_rating", "player_rating")
+    embed.add_field(name="Rating", value=truncate_float(rating), inline=False)
+    return embed
+
+def _create_player_ctf_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"CTF — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de CTF para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+
+    captures = _get_stat(stats, "flag_captures", "captures")
+    recovers = _get_stat(stats, "flag_recovers", "recovers")
+    carry_time = _get_stat(stats, "flag_carry_time", "carry_time")
+    embed.add_field(name="Flags Capturadas", value=str(captures or 0), inline=True)
+    embed.add_field(name="Recovers", value=str(recovers or 0), inline=True)
+    embed.add_field(name="Carrier time (s)", value=truncate_float(carry_time), inline=True)
+    return embed
+
+def _create_player_oddball_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Oddball — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Oddball para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+
+    carry_time = _get_stat(stats, "carry_time", "oddball_carry_time")
+    ball_kills = _get_stat(stats, "ball_kills")
+    embed.add_field(name="Carry time (s)", value=truncate_float(carry_time), inline=True)
+    embed.add_field(name="Ball kills", value=str(ball_kills or 0), inline=True)
+    return embed
+
+def _create_player_koth_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"KOTH — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de KOTH para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+
+    hill_time = _get_stat(stats, "time_in_hill", "hill_time")
+    embed.add_field(name="Time in hill (s)", value=truncate_float(hill_time), inline=True)
+    return embed
+
+def _create_player_juggernaut_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Juggernaut — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Juggernaut para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+
+    time = _get_stat(stats, "juggernaut_time")
+    embed.add_field(name="Juggernaut time (s)", value=truncate_float(time), inline=True)
+    return embed
+
+def _create_player_infection_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Infection — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Infection para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+
+    survival = _get_stat(stats, "survival_time", "infection_survival_time")
+    infections = _get_stat(stats, "infections", "infection_count")
+    embed.add_field(name="Survival time (s)", value=truncate_float(survival), inline=True)
+    embed.add_field(name="Infections", value=str(infections or 0), inline=True)
+    return embed
+
+def _create_player_territories_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Territories — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Territories para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+    captures = _get_stat(stats, "captures", "territories_captures")
+    embed.add_field(name="Captures", value=str(captures or 0), inline=True)
+    return embed
+
+def _create_player_assault_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Assault — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Assault para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+    bombs = _get_stat(stats, "bombs_planted")
+    det = _get_stat(stats, "detonations")
+    carry = _get_stat(stats, "bomb_carry_time", "bomb_carry_time")
+    defuses = _get_stat(stats, "defuses")
+    embed.add_field(name="Bombs planted", value=str(bombs or 0), inline=True)
+    embed.add_field(name="Detonations", value=str(det or 0), inline=True)
+    embed.add_field(name="Bomb carry time (s)", value=truncate_float(carry), inline=True)
+    embed.add_field(name="Defuses", value=str(defuses or 0), inline=True)
+    return embed
+
+def _create_player_stockpile_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Stockpile — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Stockpile para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+    carry = _get_stat(stats, "carry_time", "stockpile_carry_time")
+    embed.add_field(name="Carry time (s)", value=truncate_float(carry), inline=True)
+    return embed
+
+def _create_player_headhunter_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"Headhunter — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de Headhunter para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+    max_skulls = _get_stat(stats, "max_skulls", "headhunter_max_skulls")
+    embed.add_field(name="Max skulls", value=str(max_skulls or 0), inline=True)
+    return embed
+
+def _create_player_actionsack_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    embed = discord.Embed(title=f"ActionSack — {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    if not stats:
+        embed.description = "No hay estadísticas de ActionSack para esta partida."
+        embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
+        return embed
+    embed.add_field(name="Notes", value="No specific stats", inline=False)
+    return embed
+
+def _create_generic_gametype_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
+    title = f"{player_match.get('gametype_name') or player_match.get('gametype') or 'Gametype'} — Statistics"
+    embed = discord.Embed(title=title, color=0x95a5a6)
+    embed.set_author(name=player_match.get('player_name') or "Unknown")
+    if not stats:
+        embed.description = "No hay estadísticas específicas para este gametype."
+        return embed
+    for k, v in list(stats.items())[:10]:
+        if isinstance(v, (list, tuple)):
+            embed.add_field(name=k, value=", ".join(str(i) for i in v) or "—", inline=True)
+        else:
+            embed.add_field(name=k, value=str(v), inline=True)
+    return embed
+
 def create_player_combat_embed(player_match: Dict, combat_data: Dict) -> discord.Embed:
     embed = discord.Embed(
         title=f"Combat Data for {player_match['player_name']}",
@@ -149,7 +336,7 @@ def create_player_combat_embed(player_match: Dict, combat_data: Dict) -> discord
     )
 
     embed.add_field(
-        name="Basic:",
+        name="Basic",
         value=(
             f"Kills: {combat_data.get('kills', 'N/A')}\n"
             f"Deaths: {combat_data.get('deaths', 'N/A')}\n"
@@ -169,7 +356,7 @@ def create_player_combat_embed(player_match: Dict, combat_data: Dict) -> discord
     ipm_truncated = truncate_float(ipm)
 
     embed.add_field(
-        name="Per Minute:",
+        name="Per Minute",
         value=(
             f"Kills per minute: {kpm_truncated}\n"
             f"Deaths per minute: {dpm_truncated}\n"
@@ -184,7 +371,7 @@ def create_player_combat_embed(player_match: Dict, combat_data: Dict) -> discord
     kda_truncated = truncate_float(kda)
 
     embed.add_field(
-        name="Ratios:",
+        name="Ratios",
         value=(
             f"KD: {kd_truncated}\n"
             f"KDA: {kda_truncated}\n"
@@ -200,7 +387,7 @@ def create_player_breakdown_embed(player_match: Dict, breakdown_data: Dict) -> d
     )
 
     embed.add_field(
-        name="Kill Types:",
+        name="Kill Types",
         value=(
             f"Weapon kills: {breakdown_data.get('weapon_kills', 'N/A')}\n"
             f"Grenade kills: {breakdown_data.get('grenade_kills', 'N/A')}\n"
@@ -225,7 +412,7 @@ def create_player_breakdown_embed(player_match: Dict, breakdown_data: Dict) -> d
     ksr_truncated = truncate_float(ksr)
 
     embed.add_field(
-        name="Ratios:",
+        name="Ratios",
         value=(
             f"Weapon kills ratio: {wkr_truncated}\n"
             f"Grenade kills ratio: {gkr_truncated}\n"
@@ -247,7 +434,7 @@ def create_player_rivalries_embed(player_match: Dict, rivalries_data: Dict) -> d
     mkkr_truncated = truncate_float(mkkr)
 
     embed.add_field(
-        name="Player You Killed Most:",
+        name="Player You Killed Most",
         value=(
             f"Target: {rivalries_data.get('most_killed_player', 'N/A')}\n"
             f"Times you killed them: {rivalries_data.get('most_killed_count', 'N/A')}\n"
@@ -259,7 +446,7 @@ def create_player_rivalries_embed(player_match: Dict, rivalries_data: Dict) -> d
     mkkr_truncated = truncate_float(mkdr)
 
     embed.add_field(
-        name="Player Who Killed You the Most:",
+        name="Player Who Killed You the Most",
         value=(
             f"Nemesis: {rivalries_data.get('most_killer_player', 'N/A')}\n"
             f"Times they killed you: {rivalries_data.get('most_killer_count', 'N/A')}\n"
@@ -285,7 +472,7 @@ def create_player_survivability_embed(player_match: Dict, survivability_data: Di
     atr_truncated = truncate_float(atr)
 
     embed.add_field(
-        name="Survival Performance:",
+        name="Survival Performance",
         value=(
             f"Minutes alive: {ma_formatted}\n"
             f"Minutes played: {mp_formatted}\n"
@@ -305,7 +492,7 @@ def create_player_choice_embed(player_match: Dict, choice_data: Dict) -> discord
     muwkr_truncated = truncate_float(muwkr)
 
     embed.add_field(
-        name="Weapon of Choice:",
+        name="Weapon of Choice",
         value=(
             f"Most used weapon: {choice_data.get('most_used_weapon', 'N/A')}\n"
             f"Kills with this weapon: {choice_data.get('most_used_weapon_kills', 'N/A')}\n"
@@ -330,7 +517,7 @@ def create_player_medals_embed(player_match: Dict, medals_data: List[Dict]) -> d
     mpm_truncated = truncate_float(mpm)
 
     embed.add_field(
-        name="Medals:",
+        name="Medals",
         value=(
             f"Total medals: {first.get('total_medals', 'N/A')}\n"
             f"Medals per kill: {mpk_truncated}\n"
@@ -339,7 +526,7 @@ def create_player_medals_embed(player_match: Dict, medals_data: List[Dict]) -> d
     )
 
     embed.add_field(
-        name="Medals Info:",
+        name="Medals Info",
         value="\n".join(
             f"{medal_emojis.get(row['medal_type'])} {row['medal_type']}: {truncate_float(row['count'])} " for row in medals_data
         ) if medals_data else "N/A",
@@ -361,7 +548,7 @@ def create_player_penalties_embed(player_match: Dict, penalties_data: Dict) -> d
     bpk_truncated = truncate_float(bpk)
 
     embed.add_field(
-        name="Penalties:",
+        name="Penalties",
         value=(
             f"Suicides: {penalties_data.get('suicides', 'N/A')}\n"
             f"Suicides per minute: {spd_truncated}\n"

@@ -95,7 +95,6 @@ class Player(commands.Cog):
                 player_embeds.create_player_penalties_embed(player_match, data.get("penalties", {})),
             ]
             
-            # Filtrar los embeds que no se pudieron construir
             all_embeds = [embed for embed in all_embeds if embed is not None]
 
             if not all_embeds:
@@ -122,10 +121,27 @@ class Player(commands.Cog):
                 if not player_match:
                     await ctx.send(f"I didn't find any games for '{player_name}'")
                     return
+                
+                gametype_name = (player_match.get("gametype_name") or str(player_match.get("gametype")) or "").lower()
+
+                gametype_map = {
+                    "slayer": "player_best_slayer",
+                    "capturetheflag": "player_best_ctf",
+                    "oddball": "player_best_oddball",
+                    "kingofthehill": "player_best_koth",
+                    "juggernaut": "player_best_juggernaut",
+                    "infection": "player_best_infection",
+                    "territories": "player_best_territories",
+                    "assault": "player_best_assault",
+                    "stockpile": "player_best_stockpile",
+                    "headhunter": "player_best_headhunter",
+                    "actionsack": "player_best_actionsack"
+                }
 
                 subqueries = {
                     "team": queries.get("player_best_team"),
                     "rating": queries.get("player_best_rating"),
+                    "gametype": queries.get("obtener segun el gametype que tuvo esta patida"),
                     "combat": queries.get("player_best_combat"),
                     "breakdown": queries.get("player_best_breakdown"),
                     "rivalries": queries.get("player_best_rivalries"),
@@ -134,9 +150,32 @@ class Player(commands.Cog):
                     "medals": queries.get("player_best_medals"),
                     "penalties": queries.get("player_best_penalties"),
                 }
+
+                gametype_query_key = gametype_map.get(gametype_name)
+
+                if gametype_query_key:
+                    subqueries["gametype"] = queries.get(gametype_query_key)
+                else:
+                    subqueries["gametype"] = None
+
                 data = {}
-                for name, query in subqueries.items():
-                    async with db.execute(query, (player_match["player_name"],)) as cursor:
+                for name, sql in subqueries.items():
+                    if not sql:
+                        data[name] = None
+                        continue
+
+                    if name == "gametype":
+                        params = ()
+
+                        if "player_match_id" in player_match.keys() and player_match["player_match_id"] is not None:
+                            params = (player_match["player_match_id"],)
+                        else:
+                            params = (player_match["player_name"],)
+
+                    else: 
+                        params = (player_match["player_name"],)
+
+                    async with db.execute(sql, params) as cursor:
                         if name == "medals":
                             rows = await cursor.fetchall()
                             data[name] = [dict(row) for row in rows]
@@ -148,6 +187,7 @@ class Player(commands.Cog):
                 player_embeds.create_player_match_embed(player_match),
                 player_embeds.create_player_team_embed(player_match, data.get("team", {})),
                 player_embeds.create_player_rating_embed(player_match, data.get("rating", {})),
+                player_embeds.create_player_gametype_embed(player_match, data.get("gametype", {})),
                 player_embeds.create_player_combat_embed(player_match, data.get("combat", {})),
                 player_embeds.create_player_breakdown_embed(player_match, data.get("breakdown", {})),
                 player_embeds.create_player_rivalries_embed(player_match, data.get("rivalries", {})),
