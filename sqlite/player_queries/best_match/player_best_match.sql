@@ -2,6 +2,7 @@ SELECT
     P.player_name,
     P.player_id,
     PL.rating,
+    PL.player_match_id,
     T.team_id,
     T.result,
     T.color,

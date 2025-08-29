@@ -169,19 +169,25 @@ class Player(commands.Cog):
                         data[name] = None
                         continue
 
+                    params = None  
+
                     if name == "gametype":
-                        params = ()
-
-                        if "player_match_id" in player_match.keys() and player_match["player_match_id"] is not None:
-                            params = (player_match["player_match_id"],)
-
-                    async with db.execute(sql, params) as cursor:
-                        if name == "medals":
-                            rows = await cursor.fetchall()
-                            data[name] = [dict(row) for row in rows]
-                        else:
-                            row = await cursor.fetchone()
-                            data[name] = dict(row) if row else None
+                        player_match_id = player_match.get("player_match_id")
+                        if player_match_id is not None:
+                            params = (player_match_id,)
+                    else:
+                        params = (player_match["player_name"],)
+                    
+                    if params is not None:
+                        async with db.execute(sql, params) as cursor:
+                            if name == "medals":
+                                rows = await cursor.fetchall()
+                                data[name] = [dict(row) for row in rows]
+                            else:
+                                row = await cursor.fetchone()
+                                data[name] = dict(row) if row else None
+                    else:
+                        data[name] = None
             
             all_embeds = [
                 player_embeds.create_player_match_embed(player_match),
