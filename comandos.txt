@@ -1,10 +1,7 @@
-!player match player_name match_id (same 'last' command but with a specific game)
-
 !player search name_fragment (list players whose name matches that fragment)
 
-!match last N (displays a "list" of the last games and their 'match_id')
-!match info match_id (displays information about the match, the teams, and the players on each team)
-!match summary match_id (shows the result of the match, who won, kills, deaths, MVP, etc)
+!match recent <number> (displays a "list" of the last games and their 'match_id')
+!match match_id (displays information about the match, the teams, and the players on each team)
 !match best N match_id (show the best 'N' players of that game)
 
 !leaderboard matchmaking N (shows top 'N' saved players)

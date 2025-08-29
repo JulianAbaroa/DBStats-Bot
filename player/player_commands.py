@@ -1,5 +1,6 @@
 from sqlite.query_loader import QueryLoader
 from player import player_views
+from views import paginator_view
 from player import player_embeds
 from discord.ext import commands
 import aiosqlite
@@ -28,8 +29,8 @@ class Player(commands.Cog):
         try:
             async with aiosqlite.connect(paths.DATABASE_PATH) as db:
                 db.row_factory = aiosqlite.Row
-                query = queries.get("player_profile")
-                async with db.execute(query, (player_name,)) as cursor:
+                player_profile = queries.get("player_profile")
+                async with db.execute(player_profile, (player_name,)) as cursor:
                     player_data = await cursor.fetchone()
 
             if not player_data:
@@ -101,7 +102,7 @@ class Player(commands.Cog):
                 await ctx.send("Could not build any embeds for the last match. Check logs.")
                 return
 
-            view = player_views.MatchPaginatorView(pages=all_embeds)
+            view = player_views.PaginatorView(pages=all_embeds)
             await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
@@ -162,7 +163,7 @@ class Player(commands.Cog):
                 await ctx.send("Could not build any embeds for the last match. Check logs.")
                 return
 
-            view = player_views.MatchPaginatorView(pages=all_embeds)
+            view = paginator_view.PaginatorView(pages=all_embeds)
             await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
@@ -236,7 +237,7 @@ class Player(commands.Cog):
                 await ctx.send("Could not build any embeds for the requested matches. Check logs.")
                 return
 
-            view = player_views.MatchPaginatorView(pages=all_embeds)
+            view = paginator_view.PaginatorView(pages=all_embeds)
             await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
@@ -276,7 +277,7 @@ class Player(commands.Cog):
                     await ctx.send("Could not build any embed for recent games.")
                     return
 
-                view = player_views.RecentMatchesPaginatorView(pages=all_embeds, all_matches_data=matches_data)
+                view = player_views.RecentPaginatorView(pages=all_embeds, all_matches_data=matches_data)
                 
                 await ctx.send(embed=all_embeds[0], view=view)
 
@@ -341,7 +342,7 @@ class Player(commands.Cog):
                     await ctx.send("Could not build any embeds for the last match. Check logs.")
                     return
 
-                view = player_views.MatchPaginatorView(pages=all_embeds)
+                view = paginator_view.PaginatorView(pages=all_embeds)
                 await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
