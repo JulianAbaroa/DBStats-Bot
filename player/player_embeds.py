@@ -103,7 +103,7 @@ def create_player_match_embed(player_match: Dict) -> discord.Embed:
 
     embed.add_field(name="Resume", value=(
         f"Gametype name: {player_match['gametype_name']}\n"
-        f"Result: {'Victory' if player_match['winned'] else 'Defeat'}\n"
+        f"Result: {player_match['result']}\n"
         f"Match completed: {'Yes' if player_match['was_match_incomplete'] else 'No'}"
         ), inline=False
     )
@@ -111,7 +111,6 @@ def create_player_match_embed(player_match: Dict) -> discord.Embed:
     return embed
 
 def create_player_team_embed(player_match: Dict, team_data: Dict) -> discord.Embed:
-    result = team_data["result"]
     rating = int(team_data['rating'])
 
     embed = discord.Embed(
@@ -126,7 +125,7 @@ def create_player_team_embed(player_match: Dict, team_data: Dict) -> discord.Emb
             f"Team rating: {rating}\n"
             f"Team kills: {team_data['kills']}\n"
             f"Team deaths: {team_data['deaths']}\n"
-            f"Result: {result}"
+            f"Result: {team_data["result"]}"
         ), inline=True
     )
 
@@ -401,7 +400,7 @@ def create_player_recent_embeds(player_name: str, matches_data: list) -> list[di
             duration = format_duration(float(match["duration"]))
             datetime_str = match["match_timestamp"].split(".")[0]
             
-            result = "Victory" if match.get("winned") else "Defeat"
+            result = match.get("result")
             rating = int(match.get("rating", "N/A"))
 
             embed.add_field(

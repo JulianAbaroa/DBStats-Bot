@@ -29,7 +29,7 @@ def create_match_embed(match_data, teams_data):
                 f"Kills: {team['kills']}\n"
                 f"Deaths: {team['deaths']}\n"
                 f"Rating: {rating}\n"
-                f"Result: {'Victory' if team['winned'] == 1 else 'Defeat'}"
+                f"Result: {team['result']}"
             )
             embed.add_field(name=f"Team {team_name} resume:", value=team_value, inline=True)
 

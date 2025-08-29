@@ -6,7 +6,7 @@ SELECT
     M.gametype_name,
     M.is_matchmaking,
     M.match_id,
-    T.winned
+    T.result
 FROM Profiles AS P
 JOIN Players AS PL ON P.player_id = PL.player_id
 JOIN Teams AS T ON PL.team_id = T.team_id

@@ -4,7 +4,7 @@ SELECT
     T.team_id,
     T.color,
     T.rating,
-    T.winned,
+    T.result,
     T.deaths,
     T.kills
 FROM Profiles AS P

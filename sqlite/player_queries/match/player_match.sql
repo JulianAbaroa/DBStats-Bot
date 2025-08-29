@@ -3,7 +3,7 @@ SELECT
     P.player_id,
     T.team_id,
     T.color,
-    T.winned,
+    T.result,
     M.match_id,
     M.is_matchmaking,
     M.gametype_name,
