@@ -2,9 +2,9 @@ SELECT
     P.player_name,
     P.player_id,
     T.team_id,
+    T.result,
     T.color,
     T.rating,
-    T.winned,
     T.deaths,
     T.kills
 FROM Profiles AS P

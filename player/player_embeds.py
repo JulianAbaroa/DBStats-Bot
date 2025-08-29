@@ -111,6 +111,7 @@ def create_player_match_embed(player_match: Dict) -> discord.Embed:
     return embed
 
 def create_player_team_embed(player_match: Dict, team_data: Dict) -> discord.Embed:
+    result = team_data["result"]
     rating = int(team_data['rating'])
 
     embed = discord.Embed(
@@ -125,7 +126,7 @@ def create_player_team_embed(player_match: Dict, team_data: Dict) -> discord.Emb
             f"Team rating: {rating}\n"
             f"Team kills: {team_data['kills']}\n"
             f"Team deaths: {team_data['deaths']}\n"
-            f"Result: {'Victory' if team_data['winned'] else 'Defeat'}"
+            f"Result: {result}"
         ), inline=True
     )
 
