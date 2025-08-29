@@ -7,6 +7,7 @@ SELECT
     T.color,
     M.match_id,
     M.is_matchmaking,
+    M.gametype,
     M.gametype_name,
     M.was_match_incomplete,
     M.is_teams_enabled,
