@@ -36,14 +36,14 @@ class DBStats(commands.Cog):
                 await ctx.send(f"I didn't find any betrayer.")
                 return
             
-            pages = dbstats_embeds.create_betrayers_embed(betrayers_data)
+            pages = dbstats_embeds.create_betrayers_embeds(betrayers_data)
 
             if not pages:
                 await ctx.send("Could not build betrayers embed. Check logs.")
                 return
             
             view = paginator_view.PaginatorView(pages)     
-            await ctx.send(embed=pages, view=view)  
+            await ctx.send(embed=pages[0], view=view)  
 
         except Exception:
             traceback.print_exc(file=sys.stderr)

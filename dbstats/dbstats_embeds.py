@@ -1,7 +1,7 @@
 from typing import Dict, List
 import discord
 
-def create_betrayers_embed(betrayers_data: List[Dict]) -> discord.Embed:
+def create_betrayers_embeds(betrayers_data: List[Dict]) -> discord.Embed:
     per_page = 10
     embeds = []
 
