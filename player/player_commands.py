@@ -102,7 +102,7 @@ class Player(commands.Cog):
                 await ctx.send("Could not build any embeds for the last match. Check logs.")
                 return
 
-            view = player_views.PaginatorView(pages=all_embeds)
+            view = paginator_view.PaginatorView(pages=all_embeds)
             await ctx.send(embed=all_embeds[0], view=view)
 
         except Exception:
