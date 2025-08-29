@@ -174,11 +174,6 @@ class Player(commands.Cog):
 
                         if "player_match_id" in player_match.keys() and player_match["player_match_id"] is not None:
                             params = (player_match["player_match_id"],)
-                        else:
-                            params = (player_match["player_name"],)
-
-                    else: 
-                        params = (player_match["player_name"],)
 
                     async with db.execute(sql, params) as cursor:
                         if name == "medals":

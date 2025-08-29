@@ -195,6 +195,7 @@ def _create_player_slayer_embed(player_match: Dict[str, Any], stats: Optional[Di
 
 def _create_player_ctf_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     embed = discord.Embed(title=f"CTF for {player_match.get('player_name', 'Unknown')}", color=discord.Color.blue())
+    
     if not stats:
         embed.description = "There are no specific CTF stats for this match."
         embed.add_field(name="Match", value=player_match.get("match_id", "-"), inline=True)
