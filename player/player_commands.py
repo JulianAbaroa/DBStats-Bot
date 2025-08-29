@@ -141,7 +141,6 @@ class Player(commands.Cog):
                 subqueries = {
                     "team": queries.get("player_best_team"),
                     "rating": queries.get("player_best_rating"),
-                    "gametype": queries.get("obtener segun el gametype que tuvo esta patida"),
                     "combat": queries.get("player_best_combat"),
                     "breakdown": queries.get("player_best_breakdown"),
                     "rivalries": queries.get("player_best_rivalries"),
