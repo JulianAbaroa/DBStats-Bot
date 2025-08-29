@@ -9,7 +9,7 @@ def create_betrayers_embed(betrayers_data: List[Dict]) -> discord.Embed:
         chunk = betrayers_data[i:i + per_page]
 
         embed = discord.Embed(
-            tittle=f"Top Betrayers",
+            title=f"Top Betrayers",
             description="Players who have committed the most betrayals",
             color=discord.Color.blue()
         )
