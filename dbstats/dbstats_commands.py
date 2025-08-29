@@ -7,7 +7,7 @@ import traceback
 import paths
 import sys
 
-queries = QueryLoader()
+queries = QueryLoader("sqlite/dbstats queries")
 
 class DBStats(commands.Cog):
     def __init__(self, bot):
