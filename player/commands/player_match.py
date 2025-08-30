@@ -98,7 +98,7 @@ class PlayerMatch(commands.Cog):
                     player_embeds.create_player_match_embed(player_match),
                     player_embeds.create_player_team_embed(player_match, data.get("team", {})),
                     player_embeds.create_player_rating_embed(player_match, data.get("rating", {})),
-                    player_embeds.create_player_gametype_embed(player_match, data.get("gametype", {})),
+                    player_embeds.create_player_gametype_embed(dict(player_match), data.get("gametype", {})),
                     player_embeds.create_player_combat_embed(player_match, data.get("combat", {})),
                     player_embeds.create_player_breakdown_embed(player_match, data.get("breakdown", {})),
                     player_embeds.create_player_rivalries_embed(player_match, data.get("rivalries", {})),
