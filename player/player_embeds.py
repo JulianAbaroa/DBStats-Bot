@@ -1,5 +1,5 @@
 from dictionaries.medal_emojis import medal_emojis
-from dictionaries import gametypes_ids
+from dictionaries import gametypes
 from datetime import datetime
 from typing import Dict, Callable, Optional, Any, List
 import discord
@@ -153,7 +153,7 @@ def create_player_rating_embed(player_match: Dict, info: Dict) -> discord.Embed:
 
 def create_player_gametype_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
     gametype_id = player_match.get("gametype")
-    gametype_key = gametypes_ids.gametypes_ids_to_names.get(gametype_id)
+    gametype_key = gametypes.id_to_gametype.get(gametype_id)
 
     if not gametype_key:
         gametype_key = str(player_match.get("gametype_name", "")).strip().lower().replace(" ", "").replace("-", "").replace("_", "")
