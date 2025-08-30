@@ -38,7 +38,7 @@ async def setup_extensions():
     await bot.load_extension("player.commands.player_lookup")
     await bot.load_extension("player.commands.player_last")
     await bot.load_extension("player.commands.player_best")
-    await bot.load_extension("player.commands.player_avg")
+    await bot.load_extension("player.commands.player_average")
     await bot.load_extension("player.commands.player_recent")
     await bot.load_extension("player.commands.player_match")
 
