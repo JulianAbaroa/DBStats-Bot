@@ -32,7 +32,7 @@ class PlayerBest(commands.Cog):
                 subqueries = {
                     "team": queries.get("player_best_team"),
                     "rating": queries.get("player_best_rating"),
-                    "combat": queries.get("player_best_command"),
+                    "combat": queries.get("player_best_combat"),
                     "breakdown": queries.get("player_best_breakdown"),
                     "rivalries": queries.get("player_best_rivalries"),
                     "survivability": queries.get("player_best_survivability"),
@@ -41,10 +41,24 @@ class PlayerBest(commands.Cog):
                     "penalties": queries.get("player_best_penalties")
                 }   
 
+                gametype_to_query = {
+                    "slayer": "player_best_slayer",
+                    "capturetheflag": "player_best_ctf",
+                    "oddball": "player_best_oddball",
+                    "kingofthehill": "player_best_koth",
+                    "juggernaut": "player_best_juggernaut",
+                    "infection": "player_best_infection",
+                    "territories": "player_best_territories",
+                    "assault": "player_best_assault",
+                    "stockpile": "player_best_stockpile",
+                    "headhunter": "player_best_headhunter",
+                    "actionsack": "player_best_actionsack"
+                }
+
                 # Saved in DB as integer (0 = Slayer, 1 = CTF, ...) 
                 gametype = match["gametype"]
                 gametype_name = gametypes.id_to_gametype.get(gametype)
-                gametype_query = gametypes.gametype_to_query.get(gametype_name)   
+                gametype_query = gametype_to_query.get(gametype_name)   
 
                 if gametype_query:
                     subqueries["gametype"] = queries.get(gametype_query)

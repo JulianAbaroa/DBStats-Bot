@@ -41,10 +41,24 @@ class PlayerLast(commands.Cog):
                     "penalties": queries.get("player_last_penalties")
                 }
 
+                gametype_to_query = {
+                    "slayer": "player_last_slayer",
+                    "capturetheflag": "player_last_ctf",
+                    "oddball": "player_last_oddball",
+                    "kingofthehill": "player_last_koth",
+                    "juggernaut": "player_last_juggernaut",
+                    "infection": "player_last_infection",
+                    "territories": "player_last_territories",
+                    "assault": "player_last_assault",
+                    "stockpile": "player_last_stockpile",
+                    "headhunter": "player_last_headhunter",
+                    "actionsack": "player_last_actionsack"
+                }
+
                 # Saved in DB as integer (0 = Slayer, 1 = CTF, ...) 
                 gametype = match["gametype"]
                 gametype_name = gametypes.id_to_gametype.get(gametype)
-                gametype_query = gametypes.gametype_to_query.get(gametype_name)   
+                gametype_query = gametype_to_query.get(gametype_name)   
 
                 if gametype_query:
                     subqueries["gametype"] = queries.get(gametype_query)
