@@ -1,4 +1,3 @@
-from help_cog import HelpCommand
 from discord.ext import commands
 import asyncio
 import discord
@@ -35,6 +34,7 @@ async def setup_extensions():
     await bot.load_extension("dbstats.dbstats_commands")
 
     await bot.load_extension("player.commands.player_group")
+
     await bot.load_extension("player.commands.player_lookup")
     await bot.load_extension("player.commands.player_last")
     await bot.load_extension("player.commands.player_best")

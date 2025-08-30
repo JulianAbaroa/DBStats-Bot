@@ -1,4 +1,3 @@
-from player.commands.player_group import PlayerGroup
 from sqlite.query_loader import QueryLoader
 from dictionaries import gametypes
 from player import player_embeds
@@ -13,7 +12,7 @@ class PlayerMatch(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @PlayerGroup.player_group.command(name="match")
+    @commands.command(name="match")
     async def player_match(self, ctx, player_name: str, match_id: str):
         """
         Displays the match of the player with the specified `match_id`.
@@ -109,4 +108,14 @@ class PlayerMatch(commands.Cog):
             await ctx.send("An error occurred while fetching the requested match.")
 
 async def setup(bot):
-    await bot.add_cog(PlayerMatch(bot))
+    cog = PlayerMatch(bot)
+    await bot.add_cog(cog)
+
+    parent = bot.get_command("player")
+    if parent is None:
+        print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
+        return
+
+    for cmd in cog.get_commands():
+        if cmd.parent is None:
+            parent.add_command(cmd)
