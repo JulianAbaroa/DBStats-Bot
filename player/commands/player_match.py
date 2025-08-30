@@ -1,4 +1,4 @@
-from player.player_commands.player_group import PlayerGroup
+from player.commands.player_group import PlayerGroup
 from sqlite.query_loader import QueryLoader
 from dictionaries import gametypes
 from player import player_embeds
