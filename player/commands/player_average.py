@@ -95,4 +95,5 @@ async def setup(bot):
         print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
         return
 
-    parent.add_command(cog.player_average, name="avg")
+    cog.player_average.name = "avg"
+    parent.add_command(cog.player_average)

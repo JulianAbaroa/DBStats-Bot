@@ -116,4 +116,5 @@ async def setup(bot):
         print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
         return
 
-    parent.add_command(cog.player_match, name="match")
+    cog.player_match.name = "match"
+    parent.add_command(cog.player_match)
