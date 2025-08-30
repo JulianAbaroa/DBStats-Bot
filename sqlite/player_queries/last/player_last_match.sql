@@ -1,11 +1,13 @@
 SELECT
     P.player_name,
     P.player_id,
+    PL.player_match_id,
     T.team_id,
     T.color,
     T.result,
     M.match_id,
     M.is_matchmaking,
+    M.gametype,
     M.gametype_name,
     M.was_match_incomplete,
     M.is_teams_enabled,
