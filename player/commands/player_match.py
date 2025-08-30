@@ -77,7 +77,7 @@ class PlayerMatch(commands.Cog):
                         player_match_id = player_match["player_match_id"]
 
                         if player_match_id:
-                            params = (player_match_id, )
+                            params = (player_match_id, match_id)
                     else:
                         params = (player_match["player_name"], )
 
