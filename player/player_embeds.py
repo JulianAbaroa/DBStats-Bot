@@ -152,7 +152,7 @@ def create_player_rating_embed(player_match: Dict, info: Dict) -> discord.Embed:
     return embed
 
 def create_player_gametype_embed(player_match: Dict[str, Any], stats: Optional[Dict[str, Any]]) -> discord.Embed:
-    gametype_id = dict(player_match).get("gametype")
+    gametype_id = player_match.get("gametype")
     gametype_key = gametypes.id_to_gametype.get(gametype_id)
 
     if not gametype_key:

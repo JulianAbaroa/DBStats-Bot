@@ -98,7 +98,7 @@ class PlayerBest(commands.Cog):
                 player_embeds.create_player_match_embed(match),
                 player_embeds.create_player_team_embed(match, data.get("team", {})),
                 player_embeds.create_player_rating_embed(match, data.get("rating", {})),
-                player_embeds.create_player_gametype_embed(match, data.get("gametype", {})),
+                player_embeds.create_player_gametype_embed(dict(match), data.get("gametype", {})),
                 player_embeds.create_player_combat_embed(match, data.get("combat", {})),
                 player_embeds.create_player_breakdown_embed(match, data.get("breakdown", {})),
                 player_embeds.create_player_rivalries_embed(match, data.get("rivalries", {})),
