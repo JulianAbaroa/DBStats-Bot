@@ -5,8 +5,6 @@ from typing import Dict, Callable, Optional, Any, List
 import discord
 import os
 
-# TODO: Agregar un embed que muestre los stats del gametype.
-
 def format_duration(duration_minutes: float) -> str:
     try:
         duration_minutes = float(duration_minutes)

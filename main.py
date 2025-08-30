@@ -33,7 +33,15 @@ async def on_message(message):
 
 async def setup_extensions():
     await bot.load_extension("dbstats.dbstats_commands")
-    await bot.load_extension("player.player_commands")
+
+    await bot.load_extension("cogs.player.player_group")
+    await bot.load_extension("cogs.player.commands.player_lookup")
+    await bot.load_extension("cogs.player.commands.player_last")
+    await bot.load_extension("cogs.player.commands.player_best")
+    await bot.load_extension("cogs.player.commands.player_avg")
+    await bot.load_extension("cogs.player.commands.player_recent")
+    await bot.load_extension("cogs.player.commands.player_match")
+
     await bot.load_extension("match.match_commands")
     await bot.load_extension("help_cog")
 

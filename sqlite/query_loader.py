@@ -1,6 +1,7 @@
 from pathlib import Path
 import difflib
 
+# TODO: Modificar esto ya que la estructura en las carpetas cambio.
 class QueryLoader:
     def __init__(self, base_paths: str | Path | list[str | Path] = None):
         """
