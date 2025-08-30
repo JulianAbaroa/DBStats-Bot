@@ -11,7 +11,7 @@ class PlayerGroup(commands.Cog):
             await ctx.send("Use `!help player` to see all available subcommands.")
             return
         
-        cmd = self.bet.get_command("player lookup")
+        cmd = self.bot.get_command("player lookup")
         if cmd:
             await ctx.invoke(cmd, player_name=arg)
         else:

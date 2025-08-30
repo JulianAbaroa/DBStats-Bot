@@ -32,7 +32,7 @@ class PlayerAverage(commands.Cog):
                 db.row_factory = aiosqlite.Row
 
                 player_rating_sql = queries.get("player_avg_rating")
-                async with db.execute(player_rating_sql, (player_name, )) as reader:
+                async with db.execute(player_rating_sql, (player_name, n)) as reader:
                     player_rating = await reader.fetchone()
 
                 if not player_rating:
@@ -54,7 +54,7 @@ class PlayerAverage(commands.Cog):
                 }
 
                 for name, sql in subqueries.items():
-                    async with db.execute(sql, (player_name, )) as reader:
+                    async with db.execute(sql, (player_name, n)) as reader:
                         if name == "medals":
                             rows = await reader.fetchall()
                             data[name] = [dict(row) for row in rows] if rows else []
