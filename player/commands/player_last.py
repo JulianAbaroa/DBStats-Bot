@@ -13,7 +13,7 @@ class PlayerLast(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @PlayerGroup.player_group.command(name="last", parent="player")
+    @PlayerGroup.player_group.command(name="player_last", parent="player")
     async def player_last(self, ctx, *, player_name: str):
         """Displays the last saved match for the specified player."""
         try:
@@ -108,4 +108,12 @@ class PlayerLast(commands.Cog):
             await ctx.send("An error occurred while fetching the last match.")
 
 async def setup(bot):
-    await bot.add_cog(PlayerLast(bot))
+    cog = PlayerLast(bot)
+    await bot.add_cog(cog)
+
+    parent = bot.get_command("player")
+    if parent is None:
+        print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
+        return
+
+    parent.add_command(cog.player_last, name="last")

@@ -12,7 +12,7 @@ class PlayerMatch(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name="match")
+    @commands.command(name="player_match")
     async def player_match(self, ctx, player_name: str, match_id: str):
         """
         Displays the match of the player with the specified `match_id`.
@@ -116,6 +116,4 @@ async def setup(bot):
         print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
         return
 
-    for cmd in cog.get_commands():
-        if cmd.parent is None:
-            parent.add_command(cmd)
+    parent.add_command(cog.player_match, name="match")

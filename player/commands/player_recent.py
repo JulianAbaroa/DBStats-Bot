@@ -11,7 +11,7 @@ class PlayerRecent(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @PlayerGroup.player_group.command(name="recent", parent="player")
+    @PlayerGroup.player_group.command(name="player_recent", parent="player")
     async def player_recent(self, ctx, player_name: str, num_matches: str = "5"):
         """
         Displays the recent matches for the specified player.
@@ -52,4 +52,12 @@ class PlayerRecent(commands.Cog):
             await ctx.send("An error occurred while fetching recent matches.")
 
 async def setup(bot):
-    await bot.add_cog(PlayerRecent(bot))
+    cog = PlayerRecent(bot)
+    await bot.add_cog(cog)
+
+    parent = bot.get_command("player")
+    if parent is None:
+        print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
+        return
+
+    parent.add_command(cog.player_recent, name="recent")

@@ -12,7 +12,7 @@ class PlayerAverage(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @PlayerGroup.player_group.command(name="avg", parent="player")
+    @PlayerGroup.player_group.command(name="player_average", parent="player")
     async def player_average(self, ctx, player_name: str, num_matches: str = "5"):
         """
         Displays the player's average stats over their last `number` matches. 
@@ -87,4 +87,12 @@ class PlayerAverage(commands.Cog):
             await ctx.send("An error occurred while fetching the average data.")
 
 async def setup(bot):
-    await bot.add_cog(PlayerAverage(bot))
+    cog = PlayerAverage(bot)
+    await bot.add_cog(cog)
+
+    parent = bot.get_command("player")
+    if parent is None:
+        print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
+        return
+
+    parent.add_command(cog.player_average, name="avg")

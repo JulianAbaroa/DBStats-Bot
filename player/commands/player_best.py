@@ -13,7 +13,7 @@ class PlayerBest(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @PlayerGroup.player_group.command(name="best", parent="player")
+    @PlayerGroup.player_group.command(name="player_best", parent="player")
     async def player_best(self, ctx, *, player_name: str):
         """Displays the best saved match in terms of rating for the specified player."""
         try:
@@ -108,4 +108,12 @@ class PlayerBest(commands.Cog):
             await ctx.send("An error occurred while fetching the best match.")
 
 async def setup(bot):
-    await bot.add_cog(PlayerBest(bot))
+    cog = PlayerBest(bot)
+    await bot.add_cog(cog)
+
+    parent = bot.get_command("player")
+    if parent is None:
+        print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
+        return
+
+    parent.add_command(cog.player_best, name="best")

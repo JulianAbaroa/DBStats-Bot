@@ -11,7 +11,7 @@ class PlayerLookup(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @PlayerGroup.player_group.command(name="lookup", parent="player")
+    @PlayerGroup.player_group.command(name="player_lookup", parent="player")
     async def player_lookup(self, ctx, *, player_name: str):
         """Displays the player's profile and customization."""
         try:
@@ -38,4 +38,12 @@ class PlayerLookup(commands.Cog):
             await ctx.send("An error occurred while looking up the player.")
 
 async def setup(bot):
-    await bot.add_cog(PlayerLookup(bot))
+    cog = PlayerLookup(bot)
+    await bot.add_cog(cog)
+
+    parent = bot.get_command("player")
+    if parent is None:
+        print("Warning: parent command 'player' not found. Make sure player_group is loaded before this extension.")
+        return
+
+    parent.add_command(cog.player_lookup, name="lookup")
